@@ -45,8 +45,37 @@ const getAdminStats = async (req, res) => {
     // Filter officers
     const officers = users.filter((u) => u.role === "officer");
 
+    // Deduplicate departments by canonical division (Roads, Water, Sanitation, Electricity, Safety)
+    const seenDivisions = new Set();
+    const uniqueDepartments = [];
+
+    const getDivKey = (name = "") => {
+      const lower = name.toLowerCase();
+      if (lower.includes("road") || lower.includes("infra") || lower.includes("pothole")) return "roads";
+      if (lower.includes("water") || lower.includes("drain") || lower.includes("jal")) return "water";
+      if (lower.includes("sanitat") || lower.includes("garbage") || lower.includes("waste")) return "sanitation";
+      if (lower.includes("electr") || lower.includes("power") || lower.includes("light")) return "electricity";
+      if (lower.includes("safety") || lower.includes("hazard") || lower.includes("danger")) return "safety";
+      return lower;
+    };
+
+    // Prioritize canonical departments containing '&' or 'Supply'
+    const sortedDepts = [...departments].sort((a, b) => {
+      const aCanon = a.departmentName.includes("&") || a.departmentName.includes("Supply");
+      const bCanon = b.departmentName.includes("&") || b.departmentName.includes("Supply");
+      return (bCanon ? 1 : 0) - (aCanon ? 1 : 0);
+    });
+
+    for (const d of sortedDepts) {
+      const key = getDivKey(d.departmentName);
+      if (!seenDivisions.has(key)) {
+        seenDivisions.add(key);
+        uniqueDepartments.push(d);
+      }
+    }
+
     // Per-department stats
-    const deptStats = departments.map((d) => {
+    const deptStats = uniqueDepartments.map((d) => {
       const deptName = d.departmentName;
       const deptComplaints = complaints.filter((c) => {
         const cDept = typeof c.department === "object" ? c.department?.departmentName : c.department;
@@ -123,6 +152,7 @@ const getAdminStats = async (req, res) => {
         phone: off.phone || "+91 98111 22334",
         address: off.address || "Zonal Municipal Office",
         department: offDept || "Unassigned",
+        isSuspended: !!off.isSuspended,
         totalCases: offComplaints.length,
         resolvedCases: resolved,
         inProgressCases: inProgress,
@@ -603,12 +633,100 @@ const deleteAnnouncement = async (req, res) => {
   }
 };
 
+// ====================== Update Officer (Transfer Department, Suspend, Reset Password) ======================
+const updateOfficer = async (req, res) => {
+  try {
+    const officerId = req.params?.id || req.body?.officerId;
+    const { department, departmentId, isSuspended, newPassword, name, phone, address } = req.body;
+
+    if (!officerId) {
+      return res.status(400).json({ message: "Officer ID is required" });
+    }
+
+    if (getIsConnected()) {
+      const officer = await User.findById(officerId);
+      if (!officer) return res.status(404).json({ message: "Officer not found" });
+
+      if (departmentId) {
+        officer.department = departmentId;
+      } else if (department) {
+        let record = await Department.findOne({
+          departmentName: { $regex: new RegExp(department.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
+        });
+        if (!record) {
+          if (/road|pothole|footpath|infra/i.test(department)) record = await Department.findOne({ departmentName: /road/i });
+          else if (/water|leak|pipeline|drain/i.test(department)) record = await Department.findOne({ departmentName: /water/i });
+          else if (/garbage|trash|sanitation|waste/i.test(department)) record = await Department.findOne({ departmentName: /sanitat/i });
+          else if (/electric|power|light|wire/i.test(department)) record = await Department.findOne({ departmentName: /electr/i });
+          else if (/safety|hazard|danger|collapse/i.test(department)) record = await Department.findOne({ departmentName: /safety/i });
+        }
+        if (record) {
+          officer.department = record._id;
+        }
+      }
+
+      if (typeof isSuspended === "boolean") {
+        officer.isSuspended = isSuspended;
+      }
+      if (newPassword && newPassword.length >= 6) {
+        officer.password = await bcrypt.hash(newPassword, 10);
+      }
+      if (name) officer.name = name.trim();
+      if (phone !== undefined) officer.phone = phone.trim();
+      if (address !== undefined) officer.address = address.trim();
+
+      await officer.save();
+      const updated = await User.findById(officerId).select("-password").populate("department", "departmentName");
+      return res.status(200).json({ message: "Officer updated successfully", officer: updated });
+    }
+
+    // In-memory fallback
+    const mem = inMemoryUsers.find((u) => String(u._id) === String(officerId));
+    if (!mem) return res.status(404).json({ message: "Officer not found" });
+
+    if (department) mem.department = department;
+    if (typeof isSuspended === "boolean") mem.isSuspended = isSuspended;
+    if (newPassword && newPassword.length >= 6) {
+      mem.passwordHash = await bcrypt.hash(newPassword, 10);
+    }
+    if (name) mem.name = name.trim();
+    if (phone !== undefined) mem.phone = phone.trim();
+
+    res.status(200).json({ message: "Officer updated successfully", officer: mem });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+const deleteOfficer = async (req, res) => {
+  try {
+    const officerId = req.params?.id;
+    if (getIsConnected()) {
+      const officer = await User.findById(officerId);
+      if (officer) {
+        await officer.deleteOne();
+        return res.status(200).json({ message: "Officer decommissioned successfully" });
+      }
+    }
+    const idx = inMemoryUsers.findIndex((u) => String(u._id) === String(officerId));
+    if (idx !== -1) {
+      inMemoryUsers.splice(idx, 1);
+      return res.status(200).json({ message: "Officer decommissioned successfully" });
+    }
+    res.status(404).json({ message: "Officer not found" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 module.exports = {
   getAdminStats,
   assignOfficer,
   getAllComplaints,
   getAllUsers,
   createOfficer,
+  updateOfficer,
+  deleteOfficer,
   createAnnouncement,
   getAnnouncements,
   updateAnnouncement,

@@ -7,15 +7,17 @@ const { getCorsHeaders } = require("../../lib/cors");
 export async function GET(request) {
   const headers = getCorsHeaders(request?.headers?.get("origin"));
   
-  // Attempt background DB check without blocking keep-alive response
   let dbStatus = "connected";
-  try {
-    if (!getIsConnected()) {
-      connectDB().catch(() => {});
-      dbStatus = "connecting";
+  let dbError = null;
+
+  if (!getIsConnected()) {
+    try {
+      await connectDB();
+      dbStatus = getIsConnected() ? "connected" : "connecting";
+    } catch (err) {
+      dbStatus = "disconnected";
+      dbError = err.message;
     }
-  } catch {
-    dbStatus = "disconnected";
   }
 
   return NextResponse.json(
@@ -24,6 +26,7 @@ export async function GET(request) {
       service: "smart-grievance-backend",
       uptimeSeconds: Math.floor(process.uptime()),
       database: dbStatus,
+      ...(dbError ? { error: dbError } : {}),
       timestamp: new Date().toISOString(),
     },
     {

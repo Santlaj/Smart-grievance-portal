@@ -42,6 +42,11 @@ const userSchema = new mongoose.Schema(
       ref: "Department",
       default: null,
     },
+
+    isSuspended: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,

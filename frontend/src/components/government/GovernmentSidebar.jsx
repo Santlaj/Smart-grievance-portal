@@ -33,6 +33,9 @@ export function GovernmentSidebar() {
       label: user?.role === "admin" ? "Department Queues" : "Department Queue",
       icon: ClipboardList,
     },
+    ...(user?.role === "admin"
+      ? [{ to: "/admin/officers", label: "Department Officers & Powers", icon: Users }]
+      : []),
     { to: "/government/ai-review", label: "AI Review Center", icon: Sparkles },
     { to: "/government/reports", label: "Reports", icon: FileBarChart },
     { to: "/government/announcements", label: "Directives & Notices", icon: Megaphone },

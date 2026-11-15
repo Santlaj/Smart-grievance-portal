@@ -120,7 +120,7 @@ const DEFAULT_USERS = [
   // 6. Central Administrator
   {
     _id: "660000000000000000000003",
-    name: "Anita Deshmukh",
+    name: "Central Administrator",
     email: "admin@example.com",
     passwordHash: bcrypt.hashSync("password123", 10),
     phone: "+91 98222 33445",
@@ -310,6 +310,11 @@ const loginUser = async (req, res) => {
       const user = await User.findOne({ email: cleanEmail }).populate("department", "departmentName");
 
       if (user && (await bcrypt.compare(password, user.password))) {
+        if (user.isSuspended) {
+          return res.status(403).json({
+            message: "This officer account has been suspended by the Central Administrator. Contact HQ for clearance.",
+          });
+        }
         // Check requested role matching if specified
         if (role) {
           const reqRole = normalizeRole(role);

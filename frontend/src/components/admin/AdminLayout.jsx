@@ -22,7 +22,7 @@ import { useAuth } from "../../context/AuthContext";
 
 const ADMIN_NAV = [
   { to: "/admin/dashboard", label: "Executive Dashboard", icon: LayoutDashboard },
-  { to: "/admin/officers", label: "Officers & Departments", icon: Users },
+  { to: "/admin/officers", label: "Department Officers & Powers", icon: Users, badge: "Control" },
   { to: "/admin/complaints", label: "All Grievance Queues", icon: ClipboardList },
   { to: "/admin/directives", label: "Officer Directives & Memos", icon: Megaphone },
   { to: "/government/announcements", label: "Public Civic Notices", icon: ExternalLink },
@@ -94,7 +94,14 @@ export function AdminLayout({ children, title, subtitle }) {
                   <Icon className={`h-4 w-4 shrink-0 ${isActive ? "text-purple-400" : "text-slate-400"}`} />
                   <span>{item.label}</span>
                 </div>
-                {isActive && <ChevronRight className="h-3.5 w-3.5 text-purple-400" />}
+                <div className="flex items-center gap-1.5">
+                  {item.badge && (
+                    <span className="text-[9px] font-black uppercase px-1.5 py-0.5 rounded-md bg-purple-500/20 text-purple-300 border border-purple-400/30">
+                      {item.badge}
+                    </span>
+                  )}
+                  {isActive && <ChevronRight className="h-3.5 w-3.5 text-purple-400" />}
+                </div>
               </Link>
             );
           })}

@@ -11,21 +11,23 @@ async function resolveDepartment(deptName) {
   if (!deptName) deptName = "Other/Unclear";
 
   const cleanName = deptName.trim();
+  // 1. Exact or loose substring regex match
   let record = await Department.findOne({
-    departmentName: { $regex: new RegExp(`^${cleanName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i") },
+    departmentName: { $regex: new RegExp(cleanName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
   });
 
   if (!record) {
-    let search = "Other Civic Issue";
-    if (/road|pothole|footpath/i.test(cleanName)) search = "Roads Department";
-    else if (/water|leak|pipeline|drain/i.test(cleanName)) search = "Water Supply Department";
-    else if (/garbage|trash|sanitation|waste/i.test(cleanName)) search = "Sanitation Department";
-    else if (/electric|power|light|wire/i.test(cleanName)) search = "Electricity Department";
-    else if (/safety|hazard|danger|collapse/i.test(cleanName)) search = "Public Safety Department";
+    // 2. Keyword fallback matching canonical department names
+    let search = null;
+    if (/road|pothole|footpath|asphalt|crater/i.test(cleanName)) search = /road/i;
+    else if (/water|leak|pipeline|drain|sewer|jal/i.test(cleanName)) search = /water/i;
+    else if (/garbage|trash|sanitation|waste|swachh/i.test(cleanName)) search = /sanitat/i;
+    else if (/electric|power|light|wire|pole/i.test(cleanName)) search = /electr/i;
+    else if (/safety|hazard|danger|collapse/i.test(cleanName)) search = /safety/i;
 
-    record = await Department.findOne({
-      departmentName: { $regex: new RegExp(search, "i") },
-    });
+    if (search) {
+      record = await Department.findOne({ departmentName: search });
+    }
   }
 
   if (!record) {
@@ -36,6 +38,33 @@ async function resolveDepartment(deptName) {
   }
 
   return record;
+}
+
+// Helper to collect all Department ObjectIds matching an officer's division
+async function getOfficerDivisionDepartmentIds(officer) {
+  if (!officer?.department) return [];
+  const deptIds = [officer.department];
+
+  const deptRecord = await Department.findById(officer.department);
+  const deptTitle = deptRecord?.departmentName || "";
+
+  let searchRegex = null;
+  if (/road|infra|pothole|asphalt/i.test(deptTitle)) searchRegex = /road/i;
+  else if (/water|drain|pipeline|jal/i.test(deptTitle)) searchRegex = /water/i;
+  else if (/sanitat|waste|garbage/i.test(deptTitle)) searchRegex = /sanitat/i;
+  else if (/electr|power|light/i.test(deptTitle)) searchRegex = /electr/i;
+  else if (/safety|hazard|danger/i.test(deptTitle)) searchRegex = /safety/i;
+
+  if (searchRegex) {
+    const matching = await Department.find({ departmentName: searchRegex }).select("_id");
+    matching.forEach((m) => {
+      if (!deptIds.some((id) => String(id) === String(m._id))) {
+        deptIds.push(m._id);
+      }
+    });
+  }
+
+  return deptIds;
 }
 
 // ====================== Get Active Department & Assigned Complaints ======================
@@ -54,13 +83,13 @@ const getAssignedComplaints = async (req, res) => {
 
       // Role & Department-based access control:
       // Supervisors/Admins see all departments.
-      // Officers ONLY see complaints strictly routed to their department.
+      // Officers see complaints belonging to any department in their division OR directly assigned to them.
       if (!isSupervisorOrAdmin) {
-        if (officer?.department) {
-          query.department = officer.department;
-        } else {
-          query.assignedOfficer = req.user._id;
-        }
+        const divisionDeptIds = await getOfficerDivisionDepartmentIds(officer);
+        query.$or = [
+          { department: { $in: divisionDeptIds } },
+          { assignedOfficer: req.user._id },
+        ];
       }
 
       const complaints = await Complaint.find(query)
@@ -109,12 +138,21 @@ const getClosedHistory = async (req, res) => {
         $or: [{ isClosed: true }, { status: "Closed" }],
       };
 
+      // Role & Department-based access control:
+      // Supervisors/Admins see all departments.
+      // Officers see complaints belonging to any department in their division OR directly assigned to them.
       if (!isSupervisorOrAdmin) {
-        if (officer?.department) {
-          query.department = officer.department;
-        } else {
-          query.assignedOfficer = req.user._id;
-        }
+        const divisionDeptIds = await getOfficerDivisionDepartmentIds(officer);
+        query.$and = [
+          { $or: [{ isClosed: true }, { status: "Closed" }] },
+          {
+            $or: [
+              { department: { $in: divisionDeptIds } },
+              { assignedOfficer: req.user._id },
+            ],
+          },
+        ];
+        delete query.$or;
       }
 
       const closedComplaints = await Complaint.find(query)

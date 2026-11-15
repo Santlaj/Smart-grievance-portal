@@ -16,7 +16,12 @@ const connectDB = async () => {
       return;
     }
 
-    const mongoUri = process.env.MONGO_URI;
+    let mongoUri = (process.env.MONGO_URI || "").trim();
+    if (mongoUri.startsWith("MONGO_URI=")) {
+      mongoUri = mongoUri.replace(/^MONGO_URI=/, "").trim();
+    }
+    mongoUri = mongoUri.replace(/^["']/, "").replace(/["']$/, "").trim();
+
     if (!mongoUri) {
       throw new Error("MONGO_URI must be configured.");
     }

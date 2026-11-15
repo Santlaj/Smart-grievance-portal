@@ -28,6 +28,21 @@ export const adminService = {
     });
     return response.data;
   },
+
+  updateOfficer: async (id, payload) => {
+    const response = await api.put(`/admin/officers/${id}`, payload);
+    return response.data;
+  },
+
+  deleteOfficer: async (id) => {
+    const response = await api.delete(`/admin/officers/${id}`);
+    return response.data;
+  },
+
+  sendDirective: async (payload) => {
+    const response = await api.post("/admin/announcements", payload);
+    return response.data;
+  },
 };
 
 export default adminService;

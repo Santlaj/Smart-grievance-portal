@@ -85,7 +85,16 @@ export function AdminDashboard() {
     totalOfficers: 5,
   };
 
-  const departments = stats?.departmentBreakdown || [];
+  const departments = useMemo(() => {
+    const list = stats?.departmentBreakdown || [];
+    const seen = new Set();
+    return list.filter((dept) => {
+      const key = getDeptKey(dept.departmentName);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [stats?.departmentBreakdown]);
   const officers = stats?.officerPerformance || [];
   const recentGrievances = stats?.recentGrievances || [];
 

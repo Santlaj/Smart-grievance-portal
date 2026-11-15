@@ -14,23 +14,23 @@ async function resolveDepartment(deptName) {
   if (!deptName) deptName = "Other/Unclear";
 
   const cleanName = deptName.trim();
-  // Try exact match or partial match
+  // 1. Exact or loose substring regex match
   let record = await Department.findOne({
-    departmentName: { $regex: new RegExp(`^${cleanName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}`, "i") },
+    departmentName: { $regex: new RegExp(cleanName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i") },
   });
 
   if (!record) {
-    // Try matching canonical keywords
-    let search = "Other Civic Issue";
-    if (/road|pothole|footpath/i.test(cleanName)) search = "Roads Department";
-    else if (/water|leak|pipeline|drain/i.test(cleanName)) search = "Water Supply Department";
-    else if (/garbage|trash|sanitation|waste/i.test(cleanName)) search = "Sanitation Department";
-    else if (/electric|power|light|wire/i.test(cleanName)) search = "Electricity Department";
-    else if (/safety|hazard|danger|collapse/i.test(cleanName)) search = "Public Safety Department";
+    // 2. Keyword fallback matching canonical department names
+    let search = null;
+    if (/road|pothole|footpath|asphalt|crater/i.test(cleanName)) search = /road/i;
+    else if (/water|leak|pipeline|drain|sewer|jal/i.test(cleanName)) search = /water/i;
+    else if (/garbage|trash|sanitation|waste|swachh/i.test(cleanName)) search = /sanitat/i;
+    else if (/electric|power|light|wire|pole/i.test(cleanName)) search = /electr/i;
+    else if (/safety|hazard|danger|collapse/i.test(cleanName)) search = /safety/i;
 
-    record = await Department.findOne({
-      departmentName: { $regex: new RegExp(search, "i") },
-    });
+    if (search) {
+      record = await Department.findOne({ departmentName: search });
+    }
   }
 
   if (!record) {
@@ -86,10 +86,30 @@ const submitComplaint = async (req, res) => {
       const departmentRecord = await resolveDepartment(targetDeptName);
 
       // 3. Find designated authorized officer specifically for this department
-      const designatedOfficer = await User.findOne({
+      let designatedOfficer = await User.findOne({
         role: "officer",
         department: departmentRecord._id,
       });
+
+      if (!designatedOfficer) {
+        // Fallback: match by division keyword if department was aliased
+        const dTitle = departmentRecord.departmentName || "";
+        let officerSearchRegex = null;
+        if (/road|infra|pothole/i.test(dTitle)) officerSearchRegex = /road/i;
+        else if (/water|drain|pipeline/i.test(dTitle)) officerSearchRegex = /water/i;
+        else if (/sanitat|waste|garbage/i.test(dTitle)) officerSearchRegex = /sanitat/i;
+        else if (/electr|power/i.test(dTitle)) officerSearchRegex = /electr/i;
+        else if (/safety|hazard/i.test(dTitle)) officerSearchRegex = /safety/i;
+
+        if (officerSearchRegex) {
+          const matchingDepts = await Department.find({ departmentName: officerSearchRegex }).select("_id");
+          const ids = matchingDepts.map((d) => d._id);
+          designatedOfficer = await User.findOne({
+            role: "officer",
+            department: { $in: ids },
+          });
+        }
+      }
 
       // 4. Initial status derived from AI validation workflow rules:
       // Valid + designated officer found -> Accepted and Assigned
