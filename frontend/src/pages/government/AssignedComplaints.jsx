@@ -312,11 +312,24 @@ export function AssignedComplaints() {
     }
   };
 
-  const activeDivision = CANONICAL_DIVISIONS.find((d) => d.id === selectedDivisionId);
+  const isAdmin = user?.role === "admin";
+  const userDivisionId = (() => {
+    if (!user?.department) return "water";
+    const dName = user.department.toLowerCase();
+    if (dName.includes("water") || dName.includes("drain")) return "water";
+    if (dName.includes("road") || dName.includes("infra")) return "roads";
+    if (dName.includes("sanitation") || dName.includes("waste")) return "sanitation";
+    if (dName.includes("electric") || dName.includes("power")) return "electricity";
+    if (dName.includes("safety") || dName.includes("hazard")) return "safety";
+    return "other";
+  })();
+
+  const effectiveDivisionId = isAdmin ? selectedDivisionId : userDivisionId;
+  const activeDivision = CANONICAL_DIVISIONS.find((d) => d.id === effectiveDivisionId) || CANONICAL_DIVISIONS[1];
 
   // Complaints belonging ONLY to the selected department
-  const departmentComplaints = selectedDivisionId
-    ? complaints.filter((c) => getComplaintDivisionId(c) === selectedDivisionId)
+  const departmentComplaints = effectiveDivisionId
+    ? complaints.filter((c) => getComplaintDivisionId(c) === effectiveDivisionId)
     : [];
 
   const filteredDepartmentComplaints = departmentComplaints.filter((c) => {
@@ -345,8 +358,12 @@ export function AssignedComplaints() {
 
   return (
     <GovernmentLayout
-      title="Government Grievance Management"
-      subtitle="Department-based routing and grievance queues. Inspect evidence, AI findings, and track resolution."
+      title={isAdmin ? "Government Grievance Management" : `${user?.department || "Department"} Grievance Queue`}
+      subtitle={
+        isAdmin
+          ? "Department-based routing and grievance queues across all divisions."
+          : `Direct field queue and work order resolution center exclusively for ${user?.department || "your department"}.`
+      }
     >
       <div className="space-y-6 w-full min-w-0">
         {/* ============================================================== */}
@@ -660,7 +677,7 @@ export function AssignedComplaints() {
               </div>
             </div>
           </div>
-        ) : selectedDivisionId && activeDivision ? (
+        ) : effectiveDivisionId && activeDivision ? (
           /* ============================================================== */
           /* VIEW B: DEPARTMENT-SPECIFIC COMPLAINTS QUEUE                   */
           /* ============================================================== */
@@ -668,39 +685,55 @@ export function AssignedComplaints() {
             {/* Top Navigation & Breadcrumb */}
             <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 pb-3">
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedDivisionId(null);
-                    setSearch("");
-                    setStatusFilter("All");
-                  }}
-                  className="font-bold text-blue-700 hover:underline flex items-center gap-1.5 text-xs cursor-pointer bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition"
-                >
-                  <ArrowLeft className="h-3.5 w-3.5" />
-                  <span>All Departments</span>
-                </button>
+                {isAdmin ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedDivisionId(null);
+                      setSearch("");
+                      setStatusFilter("All");
+                    }}
+                    className="font-bold text-blue-700 hover:underline flex items-center gap-1.5 text-xs cursor-pointer bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition"
+                  >
+                    <ArrowLeft className="h-3.5 w-3.5" />
+                    <span>All Departments</span>
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-slate-800 bg-blue-50 border border-blue-200 px-3 py-1.5 rounded-xl shadow-2xs">
+                    <Building2 className="h-3.5 w-3.5 text-blue-600" />
+                    <span>{user?.department || "Department"}</span>
+                  </div>
+                )}
                 <span className="text-xs text-slate-400">/</span>
-                <span className="font-extrabold text-slate-800 text-xs">{activeDivision.name}</span>
+                <span className="font-extrabold text-slate-800 text-xs">
+                  {activeDivision.name} {!isAdmin && "Exclusive Queue"}
+                </span>
               </div>
 
-              {/* Department Switcher Dropdown */}
-              <div className="flex items-center gap-2 text-xs">
-                <span className="text-slate-500 font-semibold hidden sm:inline">Switch Department:</span>
-                <select
-                  value={selectedDivisionId}
-                  onChange={(e) => {
-                    setSelectedDivisionId(e.target.value);
-                    setSearch("");
-                    setStatusFilter("All");
-                  }}
-                  className="h-8 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700"
-                >
-                  {CANONICAL_DIVISIONS.map((d) => (
-                    <option key={d.id} value={d.id}>{d.shortName} Department</option>
-                  ))}
-                </select>
-              </div>
+              {/* Department Switcher Dropdown - Only accessible by Central Admin */}
+              {isAdmin ? (
+                <div className="flex items-center gap-2 text-xs">
+                  <span className="text-slate-500 font-semibold hidden sm:inline">Switch Department:</span>
+                  <select
+                    value={selectedDivisionId}
+                    onChange={(e) => {
+                      setSelectedDivisionId(e.target.value);
+                      setSearch("");
+                      setStatusFilter("All");
+                    }}
+                    className="h-8 rounded-xl border border-slate-200 bg-white px-2.5 text-xs font-bold text-slate-700"
+                  >
+                    {CANONICAL_DIVISIONS.map((d) => (
+                      <option key={d.id} value={d.id}>{d.shortName} Department</option>
+                    ))}
+                  </select>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1.5 text-[11px] font-bold text-blue-800 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+                  <ShieldCheck className="h-3.5 w-3.5 text-blue-600" />
+                  <span>Authorized Field Queue</span>
+                </div>
+              )}
             </div>
 
             {/* Department Division Header Card */}

@@ -16,15 +16,6 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-const NAV_ITEMS = [
-  { to: "/government/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/government/complaints", label: "Department Queues", icon: ClipboardList },
-  { to: "/government/ai-review", label: "AI Review Center", icon: Sparkles },
-  { to: "/government/reports", label: "Reports", icon: FileBarChart },
-  { to: "/government/announcements", label: "Directives & Notices", icon: Megaphone },
-  { to: "/government/settings", label: "Settings", icon: Settings },
-];
-
 export function GovernmentSidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
@@ -34,6 +25,19 @@ export function GovernmentSidebar() {
   const officerRoleLabel = user?.role === "admin"
     ? "Administrator (All)"
     : (user?.department ? user.department : "Department Officer");
+
+  const navItems = [
+    { to: "/government/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    {
+      to: "/government/complaints",
+      label: user?.role === "admin" ? "Department Queues" : "Department Queue",
+      icon: ClipboardList,
+    },
+    { to: "/government/ai-review", label: "AI Review Center", icon: Sparkles },
+    { to: "/government/reports", label: "Reports", icon: FileBarChart },
+    { to: "/government/announcements", label: "Directives & Notices", icon: Megaphone },
+    { to: "/government/settings", label: "Settings", icon: Settings },
+  ];
 
   const sidebarContent = (
     <div className="flex h-full flex-col justify-between bg-[#0E1B38] p-5 text-white">
@@ -80,7 +84,7 @@ export function GovernmentSidebar() {
 
         {/* Navigation */}
         <nav className="mt-6 space-y-1.5">
-          {NAV_ITEMS.map((item) => {
+          {navItems.map((item) => {
             const isActive = location.pathname === item.to;
             const Icon = item.icon;
             return (

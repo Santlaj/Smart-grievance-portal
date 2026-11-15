@@ -338,71 +338,179 @@ export function GovernmentDashboard() {
           </div>
         </div>
 
-        {/* 2.5 DEPARTMENT QUEUES */}
-        <div className="space-y-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <h2 className="text-sm font-bold text-slate-900">
-                Department Queues &amp; Workspaces
-              </h2>
-              <p className="text-xs text-slate-400 mt-0.5">Assigned grievances organized by civic division</p>
+        {/* 2.5 DEPARTMENT WORKSPACE / QUEUES */}
+        {user?.role === "admin" ? (
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900">
+                  Municipal Department Workspaces (All 6 Divisions)
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">Assigned grievances organized by civic division</p>
+              </div>
+
+              <Link
+                to="/government/complaints"
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>View All Queues</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
             </div>
 
-            <Link
-              to="/government/complaints"
-              className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1 cursor-pointer"
-            >
-              <span>View All Queues</span>
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+              {CANONICAL_DIVISIONS.map((division) => {
+                const DivIcon = division.icon;
+                const deptCount = complaints.filter(
+                  (c) => getComplaintDivisionId(c) === division.id && !c.isClosed && c.status !== "Closed"
+                ).length;
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
-            {CANONICAL_DIVISIONS.map((division) => {
-              const DivIcon = division.icon;
-              const deptCount = complaints.filter(
-                (c) => getComplaintDivisionId(c) === division.id && !c.isClosed && c.status !== "Closed"
-              ).length;
-
-              return (
-                <Link
-                  key={division.id}
-                  to={`/government/complaints?department=${division.id}`}
-                  className="rounded-2xl border border-slate-200/90 hover:border-slate-400 bg-white p-3.5 shadow-2xs hover:shadow-xs transition-all duration-200 flex flex-col justify-between cursor-pointer group"
-                >
-                  <div className="space-y-2.5">
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200/60 group-hover:bg-[#0E1B38] group-hover:text-white transition-colors shadow-2xs">
-                        <DivIcon className="h-4 w-4" />
+                return (
+                  <Link
+                    key={division.id}
+                    to={`/government/complaints?department=${division.id}`}
+                    className="rounded-2xl border border-slate-200/90 hover:border-slate-400 bg-white p-3.5 shadow-2xs hover:shadow-xs transition-all duration-200 flex flex-col justify-between cursor-pointer group"
+                  >
+                    <div className="space-y-2.5">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="grid h-9 w-9 place-items-center rounded-xl bg-slate-100 text-slate-700 border border-slate-200/60 group-hover:bg-[#0E1B38] group-hover:text-white transition-colors shadow-2xs">
+                          <DivIcon className="h-4 w-4" />
+                        </div>
+                        <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded-full border ${
+                          deptCount > 0
+                            ? "bg-slate-900 text-white border-slate-900"
+                            : "text-slate-400 bg-slate-50 border-slate-200"
+                        }`}>
+                          {deptCount}
+                        </span>
                       </div>
-                      <span className={`font-mono text-xs font-bold px-2 py-0.5 rounded-full border ${
-                        deptCount > 0
-                          ? "bg-slate-900 text-white border-slate-900"
-                          : "text-slate-400 bg-slate-50 border-slate-200"
-                      }`}>
-                        {deptCount}
-                      </span>
+
+                      <div>
+                        <h4 className="font-bold text-xs text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
+                          {division.name}
+                        </h4>
+                        <p className="text-[10px] text-slate-400 font-normal line-clamp-2 mt-1 leading-snug">
+                          {division.description}
+                        </p>
+                      </div>
                     </div>
 
-                    <div>
-                      <h4 className="font-bold text-xs text-slate-900 group-hover:text-blue-600 transition-colors leading-tight">
-                        {division.name}
-                      </h4>
-                      <p className="text-[10px] text-slate-400 font-normal line-clamp-2 mt-1 leading-snug">
-                        {division.description}
-                      </p>
+                    <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] font-semibold text-slate-400 group-hover:text-blue-600 transition-colors">
+                      <span>Open Queue</span>
+                      <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
                     </div>
-                  </div>
-
-                  <div className="pt-2.5 border-t border-slate-100 flex items-center justify-between text-[10px] font-semibold text-slate-400 group-hover:text-blue-600 transition-colors">
-                    <span>Open Queue</span>
-                    <ChevronRight className="h-3 w-3 group-hover:translate-x-0.5 transition-transform" />
-                  </div>
-                </Link>
-              );
-            })}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        ) : (
+          /* DEPARTMENT OFFICER WORKSPACE (Exclusively for Officer's Department) */
+          <div className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span>{user?.department || "Department"} Operational Workspace</span>
+                  <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-md border border-blue-200">
+                    Department Exclusive
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  Live workflow pipeline and grievance tracking exclusively for {user?.department || "your department"}
+                </p>
+              </div>
+
+              <Link
+                to={`/government/complaints?department=${getComplaintDivisionId({ department: user?.department })}`}
+                className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>Open {user?.department || "Department"} Queue</span>
+                <ArrowRight className="h-3.5 w-3.5" />
+              </Link>
+            </div>
+
+            {/* Department-Focused Operational Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+              {/* Card 1: Critical & High Priority */}
+              <Link
+                to={`/government/complaints?department=${getComplaintDivisionId({ department: user?.department })}`}
+                className="rounded-2xl border border-rose-200/90 bg-rose-50/40 hover:bg-rose-50 p-4 shadow-2xs hover:shadow-xs transition group cursor-pointer"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-rose-100 text-rose-700 font-bold text-xs">
+                    <AlertTriangle className="h-4 w-4" />
+                  </span>
+                  <span className="text-lg font-black text-rose-700">
+                    {complaints.filter((c) => c.priority === "Critical" || c.priority === "High").length}
+                  </span>
+                </div>
+                <div className="mt-2.5">
+                  <h4 className="font-bold text-xs text-slate-900 group-hover:text-rose-700 transition">
+                    Critical &amp; High Priority
+                  </h4>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Immediate field action required</p>
+                </div>
+              </Link>
+
+              {/* Card 2: Pending Review */}
+              <Link
+                to={`/government/complaints?department=${getComplaintDivisionId({ department: user?.department })}`}
+                className="rounded-2xl border border-amber-200/90 bg-amber-50/40 hover:bg-amber-50 p-4 shadow-2xs hover:shadow-xs transition group cursor-pointer"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-amber-100 text-amber-700 font-bold text-xs">
+                    <Clock className="h-4 w-4" />
+                  </span>
+                  <span className="text-lg font-black text-amber-700">{pendingCount}</span>
+                </div>
+                <div className="mt-2.5">
+                  <h4 className="font-bold text-xs text-slate-900 group-hover:text-amber-700 transition">
+                    Pending Field Review
+                  </h4>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Awaiting assignment &amp; triage</p>
+                </div>
+              </Link>
+
+              {/* Card 3: Active In-Progress */}
+              <Link
+                to={`/government/complaints?department=${getComplaintDivisionId({ department: user?.department })}`}
+                className="rounded-2xl border border-blue-200/90 bg-blue-50/40 hover:bg-blue-50 p-4 shadow-2xs hover:shadow-xs transition group cursor-pointer"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-blue-100 text-blue-700 font-bold text-xs">
+                    <Settings2 className="h-4 w-4" />
+                  </span>
+                  <span className="text-lg font-black text-blue-700">{inProgressCount}</span>
+                </div>
+                <div className="mt-2.5">
+                  <h4 className="font-bold text-xs text-slate-900 group-hover:text-blue-700 transition">
+                    Field Repairs Active
+                  </h4>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Work order assigned to field team</p>
+                </div>
+              </Link>
+
+              {/* Card 4: Resolved */}
+              <Link
+                to={`/government/complaints?department=${getComplaintDivisionId({ department: user?.department })}`}
+                className="rounded-2xl border border-emerald-200/90 bg-emerald-50/40 hover:bg-emerald-50 p-4 shadow-2xs hover:shadow-xs transition group cursor-pointer"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="grid h-8 w-8 place-items-center rounded-xl bg-emerald-100 text-emerald-700 font-bold text-xs">
+                    <CheckCircle2 className="h-4 w-4" />
+                  </span>
+                  <span className="text-lg font-black text-emerald-700">{resolvedCount}</span>
+                </div>
+                <div className="mt-2.5">
+                  <h4 className="font-bold text-xs text-slate-900 group-hover:text-emerald-700 transition">
+                    Successfully Resolved
+                  </h4>
+                  <p className="text-[10px] text-slate-500 mt-0.5">Verified &amp; citizen feedback logged</p>
+                </div>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* 3. TWO-COLUMN LOWER SECTION */}
         <div className="grid gap-6 grid-cols-1 lg:grid-cols-12 w-full min-w-0 items-start">

@@ -47,8 +47,9 @@ async function authenticateRequest(request) {
 
   const token = authHeader.split(" ")[1];
   try {
-    const secret = process.env.JWT_SECRET;
-    if (!secret || (process.env.NODE_ENV === "production" && secret.length < 32)) {
+    const isProduction = process.env.NODE_ENV === "production";
+    const secret = process.env.JWT_SECRET || (!isProduction ? "smart_grievance_production_jwt_secret_key_2026_super_secure_random_seed_9876543210" : "");
+    if (!secret || (isProduction && secret.length < 32)) {
       throw new Error("JWT_SECRET is not configured securely.");
     }
     const decoded = jwt.verify(token, secret);

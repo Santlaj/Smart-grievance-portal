@@ -9,6 +9,11 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      CI: true
+      NODE_ENV: test
+      JWT_SECRET: smart_grievance_production_jwt_secret_key_2026_super_secure_random_seed_9876543210
+      CORS_ORIGINS: http://localhost:8080,http://localhost:5173
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4

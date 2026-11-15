@@ -33,6 +33,7 @@ import { Badge } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import complaintService from "../../services/complaintService";
 import aiReviewService from "../../services/aiReviewService";
+import { useAuth } from "../../context/AuthContext";
 
 const CANONICAL_DEPARTMENTS = [
   { name: "Roads Department", label: "Roads Department (Potholes, Damaged Roads, Footpaths)" },
@@ -53,6 +54,10 @@ const CANONICAL_CATEGORIES = [
 ];
 
 export function AIReviewCenter() {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  const officerDept = user?.department || "Water Supply Department";
+
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTab, setSelectedTab] = useState("suspicious");
@@ -77,8 +82,12 @@ export function AIReviewCenter() {
   const [actionModalType, setActionModalType] = useState(null); // 'correct_category' | 'request_info' | 'mark_duplicate' | 'reject'
 
   // Modal Form Inputs
-  const [selectedCategory, setSelectedCategory] = useState("Roads & Infrastructure");
-  const [selectedDepartment, setSelectedDepartment] = useState("Roads Department");
+  const [selectedCategory, setSelectedCategory] = useState(
+    user?.department?.toLowerCase().includes("water")
+      ? "Water Supply & Drainage"
+      : user?.department || "Water Supply & Drainage"
+  );
+  const [selectedDepartment, setSelectedDepartment] = useState(user?.department || "Water Supply Department");
   const [modalRemarks, setModalRemarks] = useState("");
   const [modalReason, setModalReason] = useState("");
 
@@ -92,8 +101,20 @@ export function AIReviewCenter() {
     try {
       const data = await complaintService.getAssignedComplaints();
       if (Array.isArray(data)) {
-        setComplaints(data);
-        const res = aiReviewService.analyzeAllComplaints(data);
+        // Enforce strict departmental scoping for officers
+        const scopedData = isAdmin
+          ? data
+          : data.filter((c) => {
+              const cDept = typeof c.department === "object" ? c.department?.departmentName : c.department;
+              return (
+                (cDept && cDept.toLowerCase().includes(officerDept.toLowerCase().split(" ")[0])) ||
+                (c.category && c.category.toLowerCase().includes(officerDept.toLowerCase().split(" ")[0])) ||
+                String(c.assignedOfficer?._id || c.assignedOfficer) === String(user?._id)
+              );
+            });
+
+        setComplaints(scopedData);
+        const res = aiReviewService.analyzeAllComplaints(scopedData);
         setAnalysis(res);
       }
     } catch (err) {

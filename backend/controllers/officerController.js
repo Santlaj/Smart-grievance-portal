@@ -54,13 +54,13 @@ const getAssignedComplaints = async (req, res) => {
 
       // Role & Department-based access control:
       // Supervisors/Admins see all departments.
-      // Officers ONLY see complaints routed to their department or assigned to them.
+      // Officers ONLY see complaints strictly routed to their department.
       if (!isSupervisorOrAdmin) {
-        const conditions = [{ assignedOfficer: req.user._id }];
         if (officer?.department) {
-          conditions.push({ department: officer.department });
+          query.department = officer.department;
+        } else {
+          query.assignedOfficer = req.user._id;
         }
-        query.$and = [{ $or: conditions }];
       }
 
       const complaints = await Complaint.find(query)
@@ -79,14 +79,14 @@ const getAssignedComplaints = async (req, res) => {
       if (c.isClosed || c.status === "Closed") return false;
       if (isSupervisorOrAdmin) return true;
       const cDeptName = typeof c.department === "object" ? c.department?.departmentName : c.department;
-      const deptMatches = officerDept && cDeptName && (
-        cDeptName.toLowerCase().includes(officerDept.toLowerCase().split(" ")[0]) ||
-        officerDept.toLowerCase().includes(cDeptName.toLowerCase().split(" ")[0])
-      );
-      return (
-        String(c.assignedOfficer?._id || c.assignedOfficer) === officerId ||
-        deptMatches
-      );
+      if (officerDept) {
+        return (
+          cDeptName &&
+          (cDeptName.toLowerCase().includes(officerDept.toLowerCase().split(" ")[0]) ||
+            officerDept.toLowerCase().includes(cDeptName.toLowerCase().split(" ")[0]))
+        );
+      }
+      return String(c.assignedOfficer?._id || c.assignedOfficer) === officerId;
     });
 
     res.status(200).json(assigned);
@@ -110,11 +110,11 @@ const getClosedHistory = async (req, res) => {
       };
 
       if (!isSupervisorOrAdmin) {
-        const conditions = [{ assignedOfficer: req.user._id }];
         if (officer?.department) {
-          conditions.push({ department: officer.department });
+          query.department = officer.department;
+        } else {
+          query.assignedOfficer = req.user._id;
         }
-        query.$and = [{ $or: conditions }];
       }
 
       const closedComplaints = await Complaint.find(query)
@@ -132,14 +132,14 @@ const getClosedHistory = async (req, res) => {
       if (!c.isClosed && c.status !== "Closed") return false;
       if (isSupervisorOrAdmin) return true;
       const cDeptName = typeof c.department === "object" ? c.department?.departmentName : c.department;
-      const deptMatches = officerDept && cDeptName && (
-        cDeptName.toLowerCase().includes(officerDept.toLowerCase().split(" ")[0]) ||
-        officerDept.toLowerCase().includes(cDeptName.toLowerCase().split(" ")[0])
-      );
-      return (
-        String(c.assignedOfficer?._id || c.assignedOfficer) === officerId ||
-        deptMatches
-      );
+      if (officerDept) {
+        return (
+          cDeptName &&
+          (cDeptName.toLowerCase().includes(officerDept.toLowerCase().split(" ")[0]) ||
+            officerDept.toLowerCase().includes(cDeptName.toLowerCase().split(" ")[0]))
+        );
+      }
+      return String(c.assignedOfficer?._id || c.assignedOfficer) === officerId;
     });
     res.status(200).json(closed);
   } catch (error) {
