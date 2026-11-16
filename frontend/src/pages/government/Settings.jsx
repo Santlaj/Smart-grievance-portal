@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import GovernmentLayout from "../../components/government/GovernmentLayout";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import {
   User,
   Shield,
@@ -29,6 +30,7 @@ import officerDefaultImg from "../../assets/officer.jpg";
 
 export function Settings() {
   const { user, updateUser } = useAuth();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("profile"); // profile | department | ai-sensitivity | notifications | security
   const fileInputRef = useRef(null);
 
@@ -211,18 +213,18 @@ export function Settings() {
 
   return (
     <GovernmentLayout
-      title="Settings"
-      subtitle="Manage your session, preferences, and security."
+      title={t("nav_settings", "Settings")}
+      subtitle={t("subtitle_gov_settings", "Manage your session, preferences, and security.")}
     >
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 w-full min-w-0 items-start">
         {/* Left Sub-nav Column - exactly matching Screen 7 */}
         <div className="lg:col-span-3 space-y-1.5 bg-white p-3 rounded-2xl border border-slate-200/90 shadow-2xs">
           {[
-            { id: "profile", label: "Profile", icon: User },
-            { id: "department", label: "Department", icon: Building2 },
-            { id: "ai-sensitivity", label: "AI Sensitivity", icon: Sliders },
-            { id: "notifications", label: "Notifications", icon: Bell },
-            { id: "security", label: "Security", icon: Lock },
+            { id: "profile", label: t("nav_profile", "Profile"), icon: User },
+            { id: "department", label: t("tab_department", "Department"), icon: Building2 },
+            { id: "ai-sensitivity", label: t("tab_ai_sensitivity", "AI Sensitivity"), icon: Sliders },
+            { id: "notifications", label: t("settings_tab_notifications", "Notifications"), icon: Bell },
+            { id: "security", label: t("settings_tab_security", "Security"), icon: Lock },
           ].map((tab) => {
             const Icon = tab.icon;
             const active = activeTab === tab.id;

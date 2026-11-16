@@ -29,6 +29,7 @@ import { toast } from "sonner";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Input";
+import { useLanguage } from "../../context/LanguageContext";
 import adminService from "../../services/adminService";
 
 const DEPARTMENT_ICONS = {
@@ -51,6 +52,7 @@ function getDeptKey(name = "") {
 }
 
 export function AdminDashboard() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [activeGraphTab, setActiveGraphTab] = useState("departments"); // "departments" | "officers"

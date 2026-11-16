@@ -3,19 +3,22 @@ import { Link } from "react-router-dom";
 import { Logo } from "./Logo";
 import { Button } from "./ui/Button";
 import { useAuth } from "../context/AuthContext";
-
-const links = [
-  { href: "#home", label: "Home" },
-  { href: "#how", label: "How It Works" },
-  { href: "#portals", label: "Portals" },
-  { href: "#faq", label: "FAQ" },
-  { href: "#contact", label: "Contact" },
-];
+import { useLanguage } from "../context/LanguageContext";
+import LanguageSelector from "./LanguageSelector";
 
 export function SiteHeader() {
   const { user, isCitizen, isGovernment } = useAuth();
+  const { t } = useLanguage();
 
   const dashboardPath = isGovernment ? "/government/dashboard" : isCitizen ? "/citizen/dashboard" : "/login";
+
+  const links = [
+    { href: "#home", label: t("nav_home") },
+    { href: "#how", label: t("nav_how_it_works") },
+    { href: "#portals", label: t("nav_portals") },
+    { href: "#faq", label: t("nav_faq") },
+    { href: "#contact", label: t("nav_contact") },
+  ];
 
   return (
     <header className="sticky top-0 z-40 border-b bg-card/90 backdrop-blur-md">
@@ -29,17 +32,20 @@ export function SiteHeader() {
           ))}
         </nav>
         <div className="flex items-center gap-3">
+          {/* Universal Language Selector */}
+          <LanguageSelector />
+
           {user ? (
             <Button asChild variant="hero">
-              <Link to={dashboardPath}>Go to Dashboard</Link>
+              <Link to={dashboardPath}>{t("nav_go_to_dashboard")}</Link>
             </Button>
           ) : (
             <>
               <Button asChild variant="heroOutline" className="rounded-full px-6">
-                <Link to="/login">Login</Link>
+                <Link to="/login">{t("nav_login")}</Link>
               </Button>
               <Button asChild variant="hero" className="rounded-full px-6">
-                <Link to="/register">Register</Link>
+                <Link to="/register">{t("nav_register")}</Link>
               </Button>
             </>
           )}

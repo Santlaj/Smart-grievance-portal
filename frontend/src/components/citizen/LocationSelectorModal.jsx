@@ -12,6 +12,7 @@ import {
   LocateFixed,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { Button } from "../ui/Button";
 import { toast } from "sonner";
 import authService from "../../services/authService";
@@ -74,6 +75,7 @@ function formatNominatimAddress(item) {
 
 export default function LocationSelectorModal({ isOpen, onClose }) {
   const { user, selectedLocation, setSelectedLocation, updateUser } = useAuth();
+  const { t } = useLanguage();
   const [customInput, setCustomInput] = useState("");
   const [detectingGps, setDetectingGps] = useState(false);
   const [searchFilter, setSearchFilter] = useState("");

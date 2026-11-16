@@ -18,9 +18,11 @@ import {
 import { toast } from "sonner";
 import CitizenLayout from "../../components/citizen/CitizenLayout";
 import { Button } from "../../components/ui/Button";
+import { useLanguage } from "../../context/LanguageContext";
 import notificationService from "../../services/notificationService";
 
 export function Notifications() {
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);

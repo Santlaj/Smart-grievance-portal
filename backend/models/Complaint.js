@@ -80,6 +80,47 @@ const complaintSchema = new mongoose.Schema(
       default: "Medium",
     },
 
+    originalLanguage: {
+      type: String,
+      default: "en",
+    },
+
+    citizenPreferredLanguage: {
+      type: String,
+      default: "en",
+    },
+
+    translatedTitle: {
+      type: String,
+      default: "",
+    },
+
+    translatedDescription: {
+      type: String,
+      default: "",
+    },
+
+    translations: {
+      type: Map,
+      of: {
+        title: String,
+        description: String,
+      },
+      default: () => new Map(),
+    },
+
+    translationStatus: {
+      type: String,
+      enum: ["original", "translated", "failed", "pending"],
+      default: "original",
+    },
+
+    remarksTranslations: {
+      type: Map,
+      of: String,
+      default: () => new Map(),
+    },
+
     image: {
       type: String,
       default: "",

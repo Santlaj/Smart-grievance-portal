@@ -24,6 +24,7 @@ import departmentService from "../../services/departmentService";
 import aiReviewService from "../../services/aiReviewService";
 import { uploadEvidence } from "../../services/uploadService";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 const CATEGORIES = [
   "Roads & Infrastructure",
@@ -46,14 +47,15 @@ export function RaiseComplaint() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, selectedLocation } = useAuth();
+  const { t } = useLanguage();
   const [departments, setDepartments] = useState([]);
   const [formData, setFormData] = useState({
     title: searchParams.get("title") || "",
-    description: "",
+    description: searchParams.get("description") || "",
     category: searchParams.get("category") || "",
-    department: searchParams.get("category") || "",
+    department: searchParams.get("department") || searchParams.get("category") || "",
     location: selectedLocation && selectedLocation !== "Select Location" ? selectedLocation : "",
-    priority: "Medium",
+    priority: searchParams.get("priority") || "Medium",
   });
 
   const [imagePreview, setImagePreview] = useState(null);

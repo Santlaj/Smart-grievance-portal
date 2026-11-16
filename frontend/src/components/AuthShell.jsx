@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Home } from "lucide-react";
 import { Logo } from "./Logo";
 import hero from "../assets/hero-india-gate.jpg";
+import LanguageSelector from "./LanguageSelector";
+import { useLanguage } from "../context/LanguageContext";
 
 export function AuthShell({ subtitle, title, copy, features = [], quote, children }) {
+  const { t } = useLanguage();
   return (
     <div className="relative min-h-screen overflow-hidden">
       <img
@@ -45,14 +48,17 @@ export function AuthShell({ subtitle, title, copy, features = [], quote, childre
               to="/"
               className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors"
             >
-              <ArrowLeft className="h-3.5 w-3.5" /> Back to Home
+              <ArrowLeft className="h-3.5 w-3.5" /> {t("Home")}
             </Link>
-            <Link
-              to="/"
-              className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
-            >
-              <Home className="h-3.5 w-3.5" /> Home
-            </Link>
+            <div className="flex items-center gap-2">
+              <LanguageSelector isCompact={true} />
+              <Link
+                to="/"
+                className="text-xs font-semibold text-primary hover:underline flex items-center gap-1"
+              >
+                <Home className="h-3.5 w-3.5" /> {t("Home")}
+              </Link>
+            </div>
           </div>
           {children}
         </div>

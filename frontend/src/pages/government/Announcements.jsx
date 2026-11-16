@@ -28,9 +28,11 @@ import { Button } from "../../components/ui/Button";
 import { Input, Textarea, Label, Badge } from "../../components/ui/Input";
 import announcementService from "../../services/announcementService";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 export function Announcements() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

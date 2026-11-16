@@ -29,9 +29,11 @@ import { Button } from "../../components/ui/Button";
 import complaintService from "../../services/complaintService";
 import departmentService from "../../services/departmentService";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 export function GovernmentReports() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [complaints, setComplaints] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);

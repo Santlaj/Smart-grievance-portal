@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/Button";
 import { Input, Label, Textarea } from "../../components/ui/Input";
+import { useLanguage } from "../../context/LanguageContext";
 import adminService from "../../services/adminService";
 
 const CANONICAL_DEPARTMENTS = [
@@ -55,6 +56,7 @@ function getDeptKey(name = "") {
 }
 
 export function AdminOfficers() {
+  const { t } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState(null);
   const [search, setSearch] = useState("");

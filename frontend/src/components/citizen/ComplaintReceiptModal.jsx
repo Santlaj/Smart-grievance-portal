@@ -1,4 +1,5 @@
 import React, { useRef } from "react";
+import { useLanguage } from "../../context/LanguageContext";
 import {
   Printer,
   Download,
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 
 export function ComplaintReceiptModal({ complaint, isOpen, onClose }) {
+  const { t } = useLanguage();
   if (!isOpen || !complaint) return null;
 
   const trackingId =

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import CitizenLayout from "../../components/citizen/CitizenLayout";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import {
   User,
   Mail,
@@ -21,6 +22,7 @@ import authService from "../../services/authService";
 
 export function Profile() {
   const { user, updateUser, selectedLocation, setSelectedLocation } = useAuth();
+  const { t } = useLanguage();
   const [complaints, setComplaints] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
@@ -60,7 +62,7 @@ export function Profile() {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.name.trim()) {
-      setStatusMessage({ type: "error", text: "Full name cannot be empty." });
+      setStatusMessage({ type: "error", text: t("err_name_empty", "Full name cannot be empty.") });
       return;
     }
 
@@ -79,13 +81,13 @@ export function Profile() {
       setIsEditing(false);
       setStatusMessage({
         type: "success",
-        text: "Your profile details have been successfully updated.",
+        text: t("msg_profile_updated", "Your profile details have been successfully updated."),
       });
       setTimeout(() => setStatusMessage({ type: "", text: "" }), 4000);
     } catch (err) {
       setStatusMessage({
         type: "error",
-        text: err.response?.data?.message || "Failed to update profile details.",
+        text: err.response?.data?.message || t("err_profile_update_fail", "Failed to update profile details."),
       });
     } finally {
       setSaving(false);
@@ -107,9 +109,9 @@ export function Profile() {
       <div className="max-w-4xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-extrabold text-navy">Citizen Profile</h1>
+            <h1 className="text-3xl font-extrabold text-navy">{t("title_citizen_profile", "Citizen Profile")}</h1>
             <p className="text-sm text-muted-foreground mt-1">
-              Your registered credentials, residential ward, and civic activity record.
+              {t("subtitle_citizen_profile", "Your registered credentials, residential ward, and civic activity record.")}
             </p>
           </div>
           {!isEditing && (
@@ -118,7 +120,7 @@ export function Profile() {
               variant="outline"
               className="gap-2 border-primary/20 text-primary hover:bg-primary/5 self-start"
             >
-              <Edit2 className="h-4 w-4" /> Edit Profile
+              <Edit2 className="h-4 w-4" /> {t("btn_edit_profile", "Edit Profile")}
             </Button>
           )}
         </div>
@@ -150,10 +152,10 @@ export function Profile() {
               <h2 className="text-2xl font-extrabold text-navy">{user?.name}</h2>
               <div className="flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-blue-50 text-primary border border-blue-100">
-                  <CheckCircle2 className="h-3 w-3 text-primary" /> Verified Citizen
+                  <CheckCircle2 className="h-3 w-3 text-primary" /> {t("badge_verified_citizen", "Verified Citizen")}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Citizen ID: #{user?._id ? user._id.slice(-6).toUpperCase() : "REG-CITIZEN"}
+                  {t("label_citizen_id", "Citizen ID")}: #{user?._id ? user._id.slice(-6).toUpperCase() : "REG-CITIZEN"}
                 </span>
               </div>
             </div>
@@ -164,7 +166,7 @@ export function Profile() {
               <div className="grid gap-6 sm:grid-cols-2">
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Full Name <span className="text-destructive">*</span>
+                    {t("label_full_name", "Full Name")} <span className="text-destructive">*</span>
                   </label>
                   <input
                     type="text"
@@ -174,13 +176,13 @@ export function Profile() {
                       setFormData({ ...formData, name: e.target.value })
                     }
                     className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm font-medium text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    placeholder="Enter your full name"
+                    placeholder={t("ph_enter_full_name", "Enter your full name")}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Email Address (Read-only)
+                    {t("label_email_readonly", "Email Address (Read-only)")}
                   </label>
                   <input
                     type="email"
@@ -192,7 +194,7 @@ export function Profile() {
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Contact Phone Number
+                    {t("label_contact_phone", "Contact Phone Number")}
                   </label>
                   <input
                     type="tel"
@@ -201,13 +203,13 @@ export function Profile() {
                       setFormData({ ...formData, phone: e.target.value })
                     }
                     className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm font-medium text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    placeholder="e.g. +91 98765 43210"
+                    placeholder={t("ph_phone_number", "e.g. +91 98765 43210")}
                   />
                 </div>
 
                 <div className="space-y-2">
                   <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                    Locality / Residential Ward
+                    {t("label_locality_ward", "Locality / Residential Ward")}
                   </label>
                   <input
                     type="text"
@@ -216,7 +218,7 @@ export function Profile() {
                       setFormData({ ...formData, address: e.target.value })
                     }
                     className="w-full rounded-xl border border-input bg-background px-4 py-2.5 text-sm font-medium text-navy focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                    placeholder="e.g. Indiranagar, Bengaluru or Bandra West, Mumbai"
+                    placeholder={t("ph_locality_ward", "e.g. Indiranagar, Bengaluru or Bandra West, Mumbai")}
                   />
                 </div>
               </div>
@@ -228,14 +230,14 @@ export function Profile() {
                   onClick={handleCancel}
                   disabled={saving}
                 >
-                  <X className="h-4 w-4 mr-1.5" /> Cancel
+                  <X className="h-4 w-4 mr-1.5" /> {t("btn_cancel", "Cancel")}
                 </Button>
                 <Button type="submit" disabled={saving} className="gap-2">
                   {saving ? (
-                    <>Saving Details…</>
+                    <>{t("btn_saving_details", "Saving Details…")}</>
                   ) : (
                     <>
-                      <Check className="h-4 w-4" /> Save Changes
+                      <Check className="h-4 w-4" /> {t("btn_save_changes", "Save Changes")}
                     </>
                   )}
                 </Button>
@@ -249,7 +251,7 @@ export function Profile() {
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground block font-semibold uppercase tracking-wider">
-                    Full Name
+                    {t("label_full_name", "Full Name")}
                   </span>
                   <p className="font-bold text-navy text-base mt-0.5">{user?.name || "—"}</p>
                 </div>
@@ -261,7 +263,7 @@ export function Profile() {
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground block font-semibold uppercase tracking-wider">
-                    Registered Email
+                    {t("label_registered_email", "Registered Email")}
                   </span>
                   <p className="font-bold text-navy text-base mt-0.5">{user?.email || "—"}</p>
                 </div>
@@ -273,9 +275,9 @@ export function Profile() {
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground block font-semibold uppercase tracking-wider">
-                    Phone Number
+                    {t("label_phone_number", "Phone Number")}
                   </span>
-                  <p className="font-bold text-navy text-base mt-0.5">{user?.phone || "Not provided"}</p>
+                  <p className="font-bold text-navy text-base mt-0.5">{user?.phone || t("text_not_provided", "Not provided")}</p>
                 </div>
               </div>
 
@@ -285,9 +287,9 @@ export function Profile() {
                 </div>
                 <div>
                   <span className="text-xs text-muted-foreground block font-semibold uppercase tracking-wider">
-                    Residential Ward / Locality
+                    {t("label_residential_ward", "Residential Ward / Locality")}
                   </span>
-                  <p className="font-bold text-navy text-base mt-0.5">{user?.address || selectedLocation || "Not specified"}</p>
+                  <p className="font-bold text-navy text-base mt-0.5">{user?.address || selectedLocation || t("text_not_specified", "Not specified")}</p>
                 </div>
               </div>
             </div>
@@ -297,14 +299,14 @@ export function Profile() {
         {/* Activity & Grievance Stats */}
         <div className="rounded-3xl border bg-card p-6 shadow-card space-y-4">
           <h3 className="text-base font-extrabold text-navy">
-            Grievance Redressal Activity
+            {t("title_grievance_activity", "Grievance Redressal Activity")}
           </h3>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="p-4 rounded-2xl bg-blue-50/50 border border-blue-100 text-center">
               <FileText className="h-5 w-5 text-primary mx-auto mb-1" />
               <p className="text-2xl font-black text-navy">{total}</p>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
-                Total Submitted
+                {t("stat_total_submitted", "Total Submitted")}
               </p>
             </div>
 
@@ -312,7 +314,7 @@ export function Profile() {
               <Clock className="h-5 w-5 text-amber-600 mx-auto mb-1" />
               <p className="text-2xl font-black text-amber-700">{pending}</p>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
-                Under Review
+                {t("stat_under_review", "Under Review")}
               </p>
             </div>
 
@@ -320,7 +322,7 @@ export function Profile() {
               <Hourglass className="h-5 w-5 text-indigo-600 mx-auto mb-1" />
               <p className="text-2xl font-black text-indigo-700">{inProgress}</p>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
-                In Progress
+                {t("stat_in_progress", "In Progress")}
               </p>
             </div>
 
@@ -328,7 +330,7 @@ export function Profile() {
               <CheckCircle2 className="h-5 w-5 text-emerald-600 mx-auto mb-1" />
               <p className="text-2xl font-black text-emerald-700">{resolved}</p>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">
-                Resolved
+                {t("stat_resolved", "Resolved")}
               </p>
             </div>
           </div>

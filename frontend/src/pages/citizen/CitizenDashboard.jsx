@@ -21,6 +21,7 @@ import {
   Check,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import CitizenLayout from "../../components/citizen/CitizenLayout";
 import { Button } from "../../components/ui/Button";
 import dashboardService from "../../services/dashboardService";
@@ -37,6 +38,7 @@ import streetLightImg from "../../assets/issues/street-light.jpg";
 
 export function CitizenDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [stats, setStats] = useState({
     totalComplaints: 0,
     pending: 0,
@@ -260,7 +262,7 @@ export function CitizenDashboard() {
           {/* Banner Left Content */}
           <div className="relative z-10 max-w-lg p-6 sm:p-8 space-y-2">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">
-              WELCOME BACK,
+              {t("citizen_welcome").toUpperCase()},
             </span>
 
             <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
@@ -268,7 +270,7 @@ export function CitizenDashboard() {
             </h1>
 
             <p className="text-xs text-slate-500 font-normal leading-normal max-w-sm">
-              Report issues. Build a cleaner, safer and better city.
+              {t("hero_subtitle")}
             </p>
 
             {/* CTA Buttons */}
@@ -279,7 +281,7 @@ export function CitizenDashboard() {
               >
                 <Link to="/citizen/raise">
                   <Plus className="h-3.5 w-3.5" />
-                  <span>Report an Issue</span>
+                  <span>{t("btn_report_issue")}</span>
                 </Link>
               </Button>
 
@@ -290,7 +292,7 @@ export function CitizenDashboard() {
               >
                 <Link to="/citizen/track">
                   <Search className="h-3.5 w-3.5 text-slate-400" />
-                  <span>Track Status</span>
+                  <span>{t("btn_track_status")}</span>
                 </Link>
               </Button>
             </div>
@@ -397,7 +399,7 @@ export function CitizenDashboard() {
               </span>
               <div>
                 <p className="text-2xl font-bold text-slate-900 leading-tight">{stats.totalComplaints}</p>
-                <p className="text-[11px] text-slate-400 font-medium">Total Complaints</p>
+                <p className="text-[11px] text-slate-400 font-medium">{t("Total Complaints")}</p>
               </div>
             </div>
             {/* Sparkline curve */}
@@ -414,7 +416,7 @@ export function CitizenDashboard() {
               </span>
               <div>
                 <p className="text-2xl font-bold text-slate-900 leading-tight">{stats.pending}</p>
-                <p className="text-[11px] text-slate-400 font-medium">Pending</p>
+                <p className="text-[11px] text-slate-400 font-medium">{t("Pending")}</p>
               </div>
             </div>
             {/* Sparkline curve */}
@@ -431,7 +433,7 @@ export function CitizenDashboard() {
               </span>
               <div>
                 <p className="text-2xl font-bold text-slate-900 leading-tight">{stats.assigned}</p>
-                <p className="text-[11px] text-slate-400 font-medium">In Progress</p>
+                <p className="text-[11px] text-slate-400 font-medium">{t("In Progress")}</p>
               </div>
             </div>
             {/* Sparkline curve */}
@@ -448,7 +450,7 @@ export function CitizenDashboard() {
               </span>
               <div>
                 <p className="text-2xl font-bold text-slate-900 leading-tight">{stats.resolved}</p>
-                <p className="text-[11px] text-slate-400 font-medium">Resolved</p>
+                <p className="text-[11px] text-slate-400 font-medium">{t("Resolved")}</p>
               </div>
             </div>
             {/* Sparkline curve */}
@@ -466,14 +468,14 @@ export function CitizenDashboard() {
           <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs flex flex-col justify-between space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-sm font-bold text-slate-900">Common Issues in Your Area</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Quickly report common civic problems</p>
+                <h2 className="text-sm font-bold text-slate-900">{t("common_issues_title")}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{t("common_issues_desc")}</p>
               </div>
               <Link
                 to="/citizen/raise"
                 className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1"
               >
-                <span>View All</span>
+                <span>{t("nav_view_all", "View All")}</span>
                 <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -520,13 +522,13 @@ export function CitizenDashboard() {
           <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs flex flex-col justify-between space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-bold text-slate-900">
-                My Recent Grievances ({allComplaints.length})
+                {t("title_my_recent_grievances", "My Recent Grievances")} ({allComplaints.length})
               </h2>
               <Link
                 to="/citizen/complaints"
                 className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1"
               >
-                <span>View All</span>
+                <span>{t("nav_view_all", "View All")}</span>
                 <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -648,14 +650,14 @@ export function CitizenDashboard() {
           <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
               <div>
-                <h2 className="text-sm font-bold text-slate-900">How It Works?</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Report an issue in 3 simple steps</p>
+                <h2 className="text-sm font-bold text-slate-900">{t("how_it_works_title")}</h2>
+                <p className="text-xs text-slate-400 mt-0.5">{t("how_it_works_sub")}</p>
               </div>
               <Link
                 to="/citizen/track"
                 className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1"
               >
-                <span>View Guide</span>
+                <span>{t("nav_view_guide", "View Guide")}</span>
                 <ArrowRight className="h-3 w-3" />
               </Link>
             </div>
@@ -669,9 +671,9 @@ export function CitizenDashboard() {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 block">01</span>
-                  <h4 className="text-xs font-bold text-slate-900">Report</h4>
+                  <h4 className="text-xs font-bold text-slate-900">{t("step_report")}</h4>
                   <p className="text-[10px] text-slate-400 leading-snug mt-0.5">
-                    Upload photo, add location and describe the issue.
+                    {t("step_report_desc")}
                   </p>
                 </div>
                 {/* Arrow to Step 2 */}
@@ -687,9 +689,9 @@ export function CitizenDashboard() {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 block">02</span>
-                  <h4 className="text-xs font-bold text-slate-900">AI Analysis</h4>
+                  <h4 className="text-xs font-bold text-slate-900">{t("step_analysis")}</h4>
                   <p className="text-[10px] text-slate-400 leading-snug mt-0.5">
-                    We detect category, check duplicates and route to the right department.
+                    {t("step_analysis_desc")}
                   </p>
                 </div>
                 {/* Arrow to Step 3 */}
@@ -705,9 +707,9 @@ export function CitizenDashboard() {
                 </div>
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 block">03</span>
-                  <h4 className="text-xs font-bold text-slate-900">Track &amp; Resolve</h4>
+                  <h4 className="text-xs font-bold text-slate-900">{t("step_resolve")}</h4>
                   <p className="text-[10px] text-slate-400 leading-snug mt-0.5">
-                    Track live status and get notified on updates.
+                    {t("step_resolve_desc")}
                   </p>
                 </div>
               </div>
@@ -717,14 +719,14 @@ export function CitizenDashboard() {
           {/* Right: Live Civic Updates (Dynamic notices from MongoDB) */}
           <div className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-3">
             <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
-              <h2 className="text-sm font-bold text-slate-900">Live Civic Updates</h2>
+              <h2 className="text-sm font-bold text-slate-900">{t("live_updates_title")}</h2>
               {announcementsList.length > 0 && (
                 <button
                   type="button"
                   onClick={() => setShowAllAnnouncementsModal(true)}
                   className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline flex items-center gap-1 cursor-pointer"
                 >
-                  <span>View All</span>
+                  <span>{t("nav_view_all", "View All")}</span>
                   <ArrowRight className="h-3 w-3" />
                 </button>
               )}
@@ -734,8 +736,8 @@ export function CitizenDashboard() {
             {announcementsList.length === 0 ? (
               <div className="py-6 text-center text-slate-400 space-y-1">
                 <Megaphone className="h-7 w-7 mx-auto text-slate-300" />
-                <p className="text-xs font-medium text-slate-600">No active civic updates</p>
-                <p className="text-[11px] text-slate-400">Notices from municipal departments will appear here.</p>
+                <p className="text-xs font-medium text-slate-600">{t("no_live_updates")}</p>
+                <p className="text-[11px] text-slate-400">{t("live_updates_sub")}</p>
               </div>
             ) : (
               <div className="pt-2 space-y-2 max-h-[220px] overflow-y-auto divide-y divide-slate-100">

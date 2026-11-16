@@ -25,13 +25,16 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { Button } from "../ui/Button";
 import notificationService from "../../services/notificationService";
 import citizenAvatar from "../../assets/citizen.jpg";
 import LocationSelectorModal from "./LocationSelectorModal";
+import LanguageSelector from "../LanguageSelector";
 
 export function CitizenLayout({ children }) {
   const { user, logout, selectedLocation } = useAuth();
+  const { t } = useLanguage();
   const location = useLocation();
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,17 +46,17 @@ export function CitizenLayout({ children }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const navigationItems = [
-    { to: "/citizen/dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { to: "/citizen/raise", label: "Report an Issue", icon: PlusCircle },
-    { to: "/citizen/complaints", label: "My Complaints", icon: FileText },
-    { to: "/citizen/track", label: "Track Status", icon: Compass },
-    { to: "/citizen/notifications", label: "Notifications", icon: Bell },
+    { to: "/citizen/dashboard", label: t("nav_dashboard"), icon: LayoutDashboard },
+    { to: "/citizen/raise", label: t("btn_report_issue"), icon: PlusCircle },
+    { to: "/citizen/complaints", label: t("btn_my_complaints"), icon: FileText },
+    { to: "/citizen/track", label: t("btn_track_status"), icon: Compass },
+    { to: "/citizen/notifications", label: t("nav_notifications"), icon: Bell },
   ];
 
   const secondaryNavigationItems = [
-    { to: "#help", label: "Help & Support", icon: HelpCircle, isHelp: true },
-    { to: "/citizen/profile", label: "Profile", icon: User },
-    { to: "/citizen/profile", label: "Settings", icon: Settings },
+    { to: "#help", label: t("nav_help"), icon: HelpCircle, isHelp: true },
+    { to: "/citizen/profile", label: t("nav_profile"), icon: User },
+    { to: "/citizen/settings", label: t("nav_settings"), icon: Settings },
   ];
 
   const fetchNotifications = async () => {
@@ -286,6 +289,9 @@ export function CitizenLayout({ children }) {
 
           {/* Right Controls */}
           <div className="flex items-center gap-3 shrink-0">
+            {/* Language Switcher */}
+            <LanguageSelector />
+
             {/* Dynamic Location Pill (Click to Change) */}
             <button
               type="button"
@@ -337,7 +343,7 @@ export function CitizenLayout({ children }) {
                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 font-bold"
                   >
                     <User className="h-4 w-4 text-blue-600" />
-                    <span>My Profile</span>
+                    <span>{t("nav_profile")}</span>
                   </Link>
                   <Link
                     to="/citizen/complaints"
@@ -345,7 +351,7 @@ export function CitizenLayout({ children }) {
                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 font-bold"
                   >
                     <ListChecks className="h-4 w-4 text-blue-600" />
-                    <span>My Complaints</span>
+                    <span>{t("btn_my_complaints")}</span>
                   </Link>
                   <Link
                     to="/citizen/track"
@@ -353,7 +359,15 @@ export function CitizenLayout({ children }) {
                     className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 font-bold"
                   >
                     <Compass className="h-4 w-4 text-blue-600" />
-                    <span>Track Status</span>
+                    <span>{t("btn_track_status")}</span>
+                  </Link>
+                  <Link
+                    to="/citizen/settings"
+                    onClick={() => setShowProfileMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 font-bold"
+                  >
+                    <Settings className="h-4 w-4 text-blue-600" />
+                    <span>{t("nav_settings")}</span>
                   </Link>
                   <div className="my-1 border-t" />
                   <button
@@ -365,7 +379,7 @@ export function CitizenLayout({ children }) {
                     className="w-full flex items-center gap-2 px-3 py-2 rounded-xl text-rose-600 hover:bg-rose-50 font-bold text-left cursor-pointer"
                   >
                     <LogOut className="h-4 w-4" />
-                    <span>Logout</span>
+                    <span>{t("nav_logout")}</span>
                   </button>
                 </div>
               )}
@@ -387,7 +401,7 @@ export function CitizenLayout({ children }) {
               <div className="flex items-center gap-2">
                 <HelpCircle className="h-5 w-5 text-blue-600" />
                 <h3 className="font-extrabold text-slate-900 text-base">
-                  Civic Help & Support
+                  {t("civic_help_support", "Civic Help & Support")}
                 </h3>
               </div>
               <button
@@ -401,24 +415,24 @@ export function CitizenLayout({ children }) {
 
             <div className="space-y-3 text-xs text-slate-600">
               <div className="p-3.5 bg-blue-50/80 rounded-2xl border border-blue-100 space-y-1">
-                <p className="font-extrabold text-blue-900">National Citizen Grievance Helpline</p>
+                <p className="font-extrabold text-blue-900">{t("help_helpline_title", "National Citizen Grievance Helpline")}</p>
                 <p className="text-blue-700 font-bold text-sm flex items-center gap-1.5">
                   <PhoneCall className="h-4 w-4" /> 1800-11-2233 (Toll Free)
                 </p>
-                <p className="text-[11px] text-blue-600">Available 24/7 for civic emergencies and safety hazards.</p>
+                <p className="text-[11px] text-blue-600">{t("help_helpline_sub", "Available 24/7 for civic emergencies and safety hazards.")}</p>
               </div>
 
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                <p className="font-bold text-slate-900">How to report a civic problem?</p>
+                <p className="font-bold text-slate-900">{t("help_faq1_q", "How to report a civic problem?")}</p>
                 <p className="text-[11px] text-slate-500">
-                  Click "+ Report New Grievance", provide an accurate location, select the problem category, and upload photographic evidence.
+                  {t("help_faq1_a", "Click '+ Report New Grievance', provide an accurate location, select the problem category, and upload photographic evidence.")}
                 </p>
               </div>
 
               <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 space-y-1">
-                <p className="font-bold text-slate-900">How does live tracking work?</p>
+                <p className="font-bold text-slate-900">{t("help_faq2_q", "How does live tracking work?")}</p>
                 <p className="text-[11px] text-slate-500">
-                  Go to "Track Status" and enter your Grievance Tracking ID to view the 4-stage milestone progress from submission to resolution.
+                  {t("help_faq2_a", "Go to 'Track Status' and enter your Grievance Tracking ID to view the 4-stage milestone progress from submission to resolution.")}
                 </p>
               </div>
             </div>
@@ -430,7 +444,7 @@ export function CitizenLayout({ children }) {
                 onClick={() => setShowHelpModal(false)}
                 className="font-bold rounded-xl"
               >
-                Close
+                {t("btn_close", "Close")}
               </Button>
             </div>
           </div>

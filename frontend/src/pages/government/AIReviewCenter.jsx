@@ -31,9 +31,10 @@ import { toast } from "sonner";
 import GovernmentLayout from "../../components/government/GovernmentLayout";
 import { Badge } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
+import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import complaintService from "../../services/complaintService";
 import aiReviewService from "../../services/aiReviewService";
-import { useAuth } from "../../context/AuthContext";
 
 const CANONICAL_DEPARTMENTS = [
   { name: "Roads Department", label: "Roads Department (Potholes, Damaged Roads, Footpaths)" },
@@ -55,6 +56,7 @@ const CANONICAL_CATEGORIES = [
 
 export function AIReviewCenter() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const isAdmin = user?.role === "admin";
   const officerDept = user?.department || "Water Supply Department";
 

@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import notificationService from "../../services/notificationService";
+import { useLanguage } from "../../context/LanguageContext";
 
 export function NotificationCenterModal({
   isOpen,
@@ -25,6 +26,7 @@ export function NotificationCenterModal({
   onNotificationsChange,
 }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("all"); // "all" | "unread" | "complaint" | "announcement"
   const [searchQuery, setSearchQuery] = useState("");
   const [loadingAction, setLoadingAction] = useState(false);

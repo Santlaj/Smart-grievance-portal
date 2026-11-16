@@ -24,60 +24,12 @@ import {
 import SiteHeader from "../components/SiteHeader";
 import Footer from "../components/Footer";
 import { Button } from "../components/ui/Button";
+import { useLanguage } from "../context/LanguageContext";
 
 import hero from "../assets/hero-workflow.jpg";
 import citizen from "../assets/citizen.jpg";
 import officer from "../assets/officer.jpg";
 import skyline from "../assets/skyline.jpg";
-
-const smartFeatures = [
-  { icon: BrainCircuit, t: "AI Categorisation", d: "Automatic department mapping", c: "bg-violet-soft text-violet" },
-  { icon: ShieldAlert, t: "Duplicate Detection", d: "Flags repeated reports", c: "bg-warning-soft text-warning" },
-  { icon: ShieldCheck, t: "Secure Records", d: "Protected citizen identity", c: "bg-success-soft text-success" },
-  { icon: BarChart3, t: "Real-Time Tracking", d: "Live status updates", c: "bg-primary-soft text-primary" },
-];
-
-const steps = [
-  {
-    icon: FileText,
-    t: "1. Report",
-    d: "Citizens submit the problem, photographic evidence, and location.",
-    c: "bg-primary-soft text-primary",
-  },
-  {
-    icon: BrainCircuit,
-    t: "2. Analyze",
-    d: "The system categorizes the complaint and checks for potential duplicates.",
-    c: "bg-violet-soft text-violet",
-  },
-  {
-    icon: UserCheck,
-    t: "3. Review",
-    d: "The appropriate government officer verifies the complaint and evidence.",
-    c: "bg-success-soft text-success",
-  },
-  {
-    icon: BadgeCheck,
-    t: "4. Resolve",
-    d: "The officer updates the status, records official remarks and finishes the resolution.",
-    c: "bg-warning-soft text-warning",
-  },
-];
-
-const faqs = [
-  {
-    q: "How do I submit a grievance?",
-    a: "Register as a citizen, file a complaint with details and a photo, then track its status from your dashboard.",
-  },
-  {
-    q: "How are officers assigned?",
-    a: "Administrators assign each complaint to an officer of the concerned department and monitor timelines.",
-  },
-  {
-    q: "What roles are supported?",
-    a: "Citizen, officer and admin — each with its own dashboard and controls.",
-  },
-];
 
 function Check({ children }) {
   return (
@@ -102,6 +54,50 @@ function SectionTitle({ title, sub }) {
 }
 
 export function Home() {
+  const { t } = useLanguage();
+
+  const steps = [
+    {
+      icon: FileText,
+      t: t("how_step1_title"),
+      d: t("how_step1_desc"),
+      c: "bg-primary-soft text-primary",
+    },
+    {
+      icon: BrainCircuit,
+      t: t("how_step2_title"),
+      d: t("how_step2_desc"),
+      c: "bg-violet-soft text-violet",
+    },
+    {
+      icon: UserCheck,
+      t: t("how_step3_title"),
+      d: t("how_step3_desc"),
+      c: "bg-success-soft text-success",
+    },
+    {
+      icon: BadgeCheck,
+      t: t("how_step4_title"),
+      d: t("how_step4_desc"),
+      c: "bg-warning-soft text-warning",
+    },
+  ];
+
+  const faqs = [
+    {
+      q: t("How do I submit a grievance?"),
+      a: t("Register as a citizen, file a complaint with details and a photo, then track its status from your dashboard."),
+    },
+    {
+      q: t("How are officers assigned?"),
+      a: t("Administrators assign each complaint to an officer of the concerned department and monitor timelines."),
+    },
+    {
+      q: t("What roles are supported?"),
+      a: t("Citizen, officer and admin — each with its own dashboard and controls."),
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-background">
       <SiteHeader />
@@ -119,26 +115,23 @@ export function Home() {
         <div className="relative mx-auto max-w-7xl px-6 py-20 md:py-28">
           <div className="max-w-2xl">
             <span className="inline-flex items-center gap-2 rounded-full bg-card px-4 py-1.5 text-sm font-semibold text-primary shadow-card">
-              <span className="h-2 w-2 rounded-full bg-primary" /> AI-Powered Civic Grievance Platform
+              <span className="h-2 w-2 rounded-full bg-primary" /> {t("hero_badge")}
             </span>
             <h1 className="mt-6 text-5xl font-extrabold leading-[1.08] text-navy md:text-6xl">
-              Smarter Grievance Redressal.
-              <br />
-              <span className="text-primary">Better Communities.</span>
+              {t("hero_title")}
             </h1>
             <p className="mt-6 max-w-xl text-lg text-navy/80">
-              Report civic issues, track their progress, and help government departments resolve public
-              problems with greater transparency and AI-assisted verification.
+              {t("hero_subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild variant="hero" size="xl">
                 <Link to="/citizen/raise">
-                  Report a Complaint <ArrowRight />
+                  {t("btn_report_issue_now")} <ArrowRight />
                 </Link>
               </Button>
               <Button asChild variant="heroOutline" size="xl">
                 <Link to="/login?portal=gov">
-                  <Landmark /> Government Login
+                  <Landmark /> {t("portal_officer_title")}
                 </Link>
               </Button>
             </div>
@@ -149,8 +142,8 @@ export function Home() {
       {/* Portals Section */}
       <section id="portals" className="mx-auto max-w-7xl px-6 py-20">
         <SectionTitle
-          title="Choose Your Portal"
-          sub="Access the right portal based on your role and start making a difference."
+          title={t("nav_portals")}
+          sub={t("Choose your portal based on your role and start making a difference.")}
         />
         <div className="grid gap-8 lg:grid-cols-2">
           {/* Citizen Portal Card */}
@@ -169,19 +162,19 @@ export function Home() {
                   <Users className="h-7 w-7" />
                 </span>
                 <div>
-                  <h3 className="text-2xl font-extrabold text-navy">Citizen Portal</h3>
-                  <p className="text-sm text-muted-foreground">For Citizens</p>
+                  <h3 className="text-2xl font-extrabold text-navy">{t("portal_citizen_title")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("For Citizens")}</p>
                 </div>
               </div>
               <ul className="mt-6 space-y-3.5">
-                <Check>Report civic issues with photos and location</Check>
-                <Check>Track complaint status in real time</Check>
-                <Check>View department response and resolution</Check>
-                <Check>Receive notifications on every update</Check>
+                <Check>{t("Report civic issues with photos and location")}</Check>
+                <Check>{t("Track complaint status in real time")}</Check>
+                <Check>{t("View department response and resolution")}</Check>
+                <Check>{t("Receive notifications on every update")}</Check>
               </ul>
               <Button asChild variant="hero" size="xl" className="mt-8 w-full">
                 <Link to="/login?portal=citizen">
-                  Enter Citizen Portal <ArrowRight />
+                  {t("portal_citizen_title")} <ArrowRight />
                 </Link>
               </Button>
             </div>
@@ -195,19 +188,19 @@ export function Home() {
                   <Landmark className="h-7 w-7" />
                 </span>
                 <div>
-                  <h3 className="text-2xl font-extrabold text-navy">Government Portal</h3>
-                  <p className="text-sm text-muted-foreground">For Officers & Administrators</p>
+                  <h3 className="text-2xl font-extrabold text-navy">{t("portal_officer_title")}</h3>
+                  <p className="text-sm text-muted-foreground">{t("For Officers & Administrators")}</p>
                 </div>
               </div>
               <ul className="mt-6 space-y-3.5">
-                <Check>Manage and resolve citizen complaints</Check>
-                <Check>AI review for duplicates and evidence review</Check>
-                <Check>Update status, remarks and completion dates</Check>
-                <Check>View department summaries and announcements</Check>
+                <Check>{t("Manage and resolve citizen complaints")}</Check>
+                <Check>{t("AI review for duplicates and evidence review")}</Check>
+                <Check>{t("Update status, remarks and completion dates")}</Check>
+                <Check>{t("View department summaries and announcements")}</Check>
               </ul>
               <Button asChild variant="navy" size="xl" className="mt-8 w-full">
                 <Link to="/login?portal=gov">
-                  Enter Government Portal <ArrowRight />
+                  {t("portal_officer_title")} <ArrowRight />
                 </Link>
               </Button>
             </div>
@@ -226,8 +219,8 @@ export function Home() {
       {/* How It Works */}
       <section id="how" className="mx-auto max-w-7xl px-6 pb-20">
         <SectionTitle
-          title="How It Works"
-          sub="From complaint to resolution — a simple and transparent process."
+          title={t("how_title")}
+          sub={t("how_subtitle")}
         />
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           {steps.map((s, i) => (
@@ -245,37 +238,11 @@ export function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section id="features" className="mx-auto max-w-7xl px-6 pb-20">
-        <SectionTitle
-          title="Smart Features"
-          sub="Engineered for efficiency, transparency, and rapid civic response."
-        />
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {[
-            { t: "Easy Complaint Submission", d: "Structured filing with photos and precise addresses." },
-            { t: "AI-Assisted Categorization", d: "Automated analysis recommending the right department." },
-            { t: "Duplicate Detection", d: "Identifies existing complaints nearby to avoid duplicate work." },
-            { t: "Evidence Review", d: "Assists officers by flagging reports that need manual inspection." },
-            { t: "Location-Based Reporting", d: "Structured address and landmark tracking for civic problems." },
-            { t: "Transparent Tracking", d: "Track status milestones from pending to resolved." },
-            { t: "Department Routing", d: "Complaints flow directly to assigned officers." },
-            { t: "Resolution Updates", d: "Official remarks and photographic resolution proof." },
-          ].map((feat) => (
-            <div key={feat.t} className="rounded-2xl border bg-card p-6 shadow-card">
-              <CheckCircle2 className="h-6 w-6 text-primary" />
-              <h3 className="mt-3 font-bold text-navy">{feat.t}</h3>
-              <p className="mt-1.5 text-xs text-muted-foreground leading-relaxed">{feat.d}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* FAQ Section (matches screenshot exactly) */}
+      {/* FAQ Section */}
       <section id="faq" className="mx-auto max-w-7xl px-6 pb-20">
         <SectionTitle
-          title="Common Questions"
-          sub="Everything you need to know to get started."
+          title={t("nav_faq")}
+          sub={t("Everything you need to know to get started.")}
         />
         <div className="grid gap-6 md:grid-cols-3">
           {faqs.map((f) => (
@@ -287,7 +254,7 @@ export function Home() {
         </div>
       </section>
 
-      {/* Call to Action Banner (matches screenshot exactly) */}
+      {/* Call to Action Banner */}
       <section id="contact" className="mx-auto max-w-7xl px-6 pb-20">
         <div className="relative overflow-hidden rounded-3xl border bg-sky p-10 shadow-card md:p-14">
           <img
@@ -300,24 +267,23 @@ export function Home() {
           />
           <div className="relative max-w-lg">
             <p className="text-xs font-bold uppercase tracking-widest text-primary">
-              CLEANER CITIES. HAPPIER COMMUNITIES.
+              {t("CLEANER CITIES. HAPPIER COMMUNITIES.")}
             </p>
             <h2 className="mt-2 text-3xl font-extrabold text-navy md:text-5xl">
-              Let's Build a Better Tomorrow
+              {t("Let's Build a Better Tomorrow")}
             </h2>
             <p className="mt-4 text-sm text-muted-foreground md:text-base leading-relaxed">
-              Your voice matters. Report, track and help us create cleaner, safer and more livable
-              cities for everyone.
+              {t("hero_subtitle")}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
               <Button asChild variant="hero" size="xl">
                 <Link to="/citizen/raise">
-                  Report a Complaint <ArrowRight />
+                  {t("btn_report_issue_now")} <ArrowRight />
                 </Link>
               </Button>
               <Button asChild variant="heroOutline" size="xl">
                 <Link to="/citizen/complaints">
-                  <Search /> Track Complaint
+                  <Search /> {t("btn_track_status")}
                 </Link>
               </Button>
             </div>

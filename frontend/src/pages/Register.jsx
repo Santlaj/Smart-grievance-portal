@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import AuthShell from "../components/AuthShell";
 import { Button } from "../components/ui/Button";
 import { Input, Label } from "../components/ui/Input";
@@ -106,6 +107,7 @@ const getPasswordStrength = (pwd = "") => {
 export function Register() {
   const navigate = useNavigate();
   const { register } = useAuth();
+  const { t } = useLanguage();
 
   const [step, setStep] = useState(0);
   const [formData, setFormData] = useState({

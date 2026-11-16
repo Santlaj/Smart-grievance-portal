@@ -15,11 +15,13 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
+import { useLanguage } from "../context/LanguageContext";
 import AuthShell from "../components/AuthShell";
 import { Button } from "../components/ui/Button";
 import { Input } from "../components/ui/Input";
 
 export function Login() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const portalParam = searchParams.get("portal");
   const [govMode, setGovMode] = useState(portalParam === "gov");
@@ -129,9 +131,9 @@ export function Login() {
 
       <div className="text-center">
         <h2 className="text-2xl font-extrabold text-navy">
-          {govMode ? "Government Portal" : "Citizen Login"}
+          {govMode ? t("portal_officer_title") : t("auth_login_title")}
         </h2>
-        <p className="mt-1 text-sm text-muted-foreground">Sign in to your account</p>
+        <p className="mt-1 text-sm text-muted-foreground">{t("auth_login_subtitle")}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="mt-6 space-y-4">
@@ -140,7 +142,7 @@ export function Login() {
           <Input
             type="email"
             required
-            placeholder="Email address"
+            placeholder={t("auth_email")}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="pl-11"
@@ -152,7 +154,7 @@ export function Login() {
           <Input
             type={showPassword ? "text" : "password"}
             required
-            placeholder="Password"
+            placeholder={t("auth_password")}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="px-11"
@@ -174,7 +176,7 @@ export function Login() {
           className="mt-2 w-full"
           disabled={busy}
         >
-          {busy ? "Signing in…" : "Sign In"} <ArrowRight />
+          {busy ? t("btn_submitting") : t("nav_login")} <ArrowRight />
         </Button>
       </form>
 

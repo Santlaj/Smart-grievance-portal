@@ -27,6 +27,7 @@ import AdminLayout from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/Button";
 import { Input, Textarea, Label, Badge } from "../../components/ui/Input";
 import announcementService from "../../services/announcementService";
+import { useLanguage } from "../../context/LanguageContext";
 
 const CANONICAL_DEPARTMENTS = [
   { name: "Water Supply Department", label: "💧 Water Supply Department (Priya Verma)", officer: "Priya Verma" },
@@ -37,6 +38,7 @@ const CANONICAL_DEPARTMENTS = [
 ];
 
 export function AdminDirectives() {
+  const { t } = useLanguage();
   const [directives, setDirectives] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

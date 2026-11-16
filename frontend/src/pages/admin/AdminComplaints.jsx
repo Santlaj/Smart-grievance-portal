@@ -23,9 +23,11 @@ import { toast } from "sonner";
 import AdminLayout from "../../components/admin/AdminLayout";
 import { Button } from "../../components/ui/Button";
 import { Badge, Input, Label } from "../../components/ui/Input";
+import { useLanguage } from "../../context/LanguageContext";
 import adminService from "../../services/adminService";
 
 export function AdminComplaints() {
+  const { t } = useLanguage();
   const [searchParams] = useSearchParams();
   const queryDept = searchParams.get("dept") || "All";
   const queryOfficer = searchParams.get("officer") || "";

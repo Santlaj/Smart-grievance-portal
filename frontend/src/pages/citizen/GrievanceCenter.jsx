@@ -27,6 +27,7 @@ import { Badge } from "../../components/ui/Input";
 import complaintService from "../../services/complaintService";
 import { uploadEvidence } from "../../services/uploadService";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import skylineImg from "../../assets/skyline.jpg";
 
 const CATEGORIES = [
@@ -43,15 +44,16 @@ export function GrievanceCenter() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { user, selectedLocation } = useAuth();
+  const { t } = useLanguage();
 
   // Active view tab on mobile/small screens (both visible on lg)
   const [activeTab, setActiveTab] = useState("all"); // "report" | "complaints" | "all"
 
   // Form State
   const [title, setTitle] = useState(searchParams.get("title") || "");
-  const [description, setDescription] = useState("");
+  const [description, setDescription] = useState(searchParams.get("description") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "Select civic category");
-  const [priority, setPriority] = useState("Medium");
+  const [priority, setPriority] = useState(searchParams.get("priority") || "Medium");
   const [location, setLocation] = useState(
     selectedLocation && selectedLocation !== "Select Location"
       ? selectedLocation
@@ -307,7 +309,7 @@ export function GrievanceCenter() {
                     : "border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
                 }`}
               >
-                Report Issue
+                {t("btn_report_issue")}
               </button>
 
               <button
@@ -319,7 +321,7 @@ export function GrievanceCenter() {
                     : "border-slate-200 text-slate-600 bg-white hover:bg-slate-50"
                 }`}
               >
-                My Complaints ({complaints.length})
+                {t("btn_my_complaints")} ({complaints.length})
               </button>
             </div>
           </div>
@@ -340,11 +342,26 @@ export function GrievanceCenter() {
             {/* Panel Title */}
             <div className="border-b border-slate-100 pb-4 space-y-1">
               <h2 className="text-base font-extrabold text-slate-900">
-                Report a Civic Issue
+                {t("btn_report_issue")}
               </h2>
               <p className="text-xs text-slate-500 leading-relaxed">
-                Provide details, photographic evidence, and location. Our system will automatically categorize the problem and route it to the right department.
+                {t("form_description_placeholder")}
               </p>
+            </div>
+
+            {/* AI Assistant Banner Helper inside Form */}
+            <div className="rounded-2xl border border-primary/20 bg-linear-to-r from-primary/5 via-indigo-50/40 to-purple-50/30 p-3.5 flex items-center justify-between gap-3 shadow-2xs">
+              <div className="flex items-center gap-2.5">
+                <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary text-white shadow-xs">
+                  <Sparkles className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-xs font-bold text-slate-900">{t("ai_widget_title")}</p>
+                  <p className="text-[11px] text-slate-600 leading-tight">
+                    {t("form_ai_assistant_hint")}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Submission Form */}
@@ -352,13 +369,13 @@ export function GrievanceCenter() {
               {/* 1. Grievance Title */}
               <div className="space-y-1.5">
                 <label className="font-extrabold text-slate-800 block text-xs">
-                  Grievance Title <span className="text-rose-500">*</span>
+                  {t("form_title")} <span className="text-rose-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="e.g. Large pothole near Sector 14 signal"
+                  placeholder={t("form_title_placeholder")}
                   className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
                   required
                 />
@@ -367,7 +384,7 @@ export function GrievanceCenter() {
               {/* 2. Detailed Description */}
               <div className="space-y-1.5">
                 <label className="font-extrabold text-slate-800 block text-xs">
-                  Detailed Description <span className="text-rose-500">*</span>
+                  {t("form_description")} <span className="text-rose-500">*</span>
                 </label>
                 <div className="relative">
                   <textarea
@@ -375,7 +392,7 @@ export function GrievanceCenter() {
                     maxLength={500}
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Describe the issue, its impact, and any landmarks nearby..."
+                    placeholder={t("form_description_placeholder")}
                     className="w-full p-3.5 pb-6 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition resize-none"
                     required
                   />
@@ -390,7 +407,7 @@ export function GrievanceCenter() {
                 {/* Department / Category */}
                 <div className="space-y-1.5">
                   <label className="font-extrabold text-slate-800 block text-xs">
-                    Department / Category <span className="text-rose-500">*</span>
+                    {t("form_category")} <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={category}
@@ -399,7 +416,7 @@ export function GrievanceCenter() {
                   >
                     {CATEGORIES.map((cat) => (
                       <option key={cat} value={cat}>
-                        {cat}
+                        {t(cat)}
                       </option>
                     ))}
                   </select>
@@ -408,17 +425,17 @@ export function GrievanceCenter() {
                 {/* Priority Level */}
                 <div className="space-y-1.5">
                   <label className="font-extrabold text-slate-800 block text-xs">
-                    Priority Level <span className="text-rose-500">*</span>
+                    {t("form_priority")} <span className="text-rose-500">*</span>
                   </label>
                   <select
                     value={priority}
                     onChange={(e) => setPriority(e.target.value)}
                     className="w-full h-10 px-3 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
                   >
-                    <option value="Low">🚩 Low (Standard timeline)</option>
-                    <option value="Medium">🚩 Medium (Standard timeline)</option>
-                    <option value="High">🚩 High (Urgent action)</option>
-                    <option value="Critical">🚩 Critical (Emergency hazard)</option>
+                    <option value="Low">🚩 {t("priority_low")}</option>
+                    <option value="Medium">🚩 {t("priority_medium")}</option>
+                    <option value="High">🚩 {t("priority_high")}</option>
+                    <option value="Critical">🚩 {t("priority_critical")}</option>
                   </select>
                 </div>
               </div>
@@ -493,7 +510,7 @@ export function GrievanceCenter() {
               {/* 5. Location Details */}
               <div className="space-y-1.5">
                 <label className="font-extrabold text-slate-800 block text-xs">
-                  Location Details <span className="text-rose-500">*</span>
+                  {t("form_location")} <span className="text-rose-500">*</span>
                 </label>
                 <div className="flex gap-2">
                   <div className="relative flex-1">
@@ -501,7 +518,7 @@ export function GrievanceCenter() {
                       type="text"
                       value={location}
                       onChange={(e) => setLocation(e.target.value)}
-                      placeholder="Enter address or landmark (e.g. Near City Park, Phagwara)"
+                      placeholder={t("form_location_placeholder")}
                       className="w-full h-10 px-3.5 rounded-xl border border-slate-200 bg-white text-xs font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/20 focus:border-blue-600 transition"
                       required
                     />
@@ -512,7 +529,7 @@ export function GrievanceCenter() {
                     className="inline-flex items-center gap-1.5 px-3.5 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition cursor-pointer shrink-0 border border-slate-200"
                   >
                     <MapPin className="h-3.5 w-3.5 text-blue-600" />
-                    <span>Use my location</span>
+                    <span>{t("btn_detect_location")}</span>
                   </button>
                 </div>
               </div>
@@ -526,7 +543,7 @@ export function GrievanceCenter() {
                   className="rounded-xl font-bold text-xs gap-1.5 h-10 border-slate-300"
                 >
                   <Save className="h-3.5 w-3.5" />
-                  <span>Save as Draft</span>
+                  <span>{t("btn_save")}</span>
                 </Button>
 
                 <Button
@@ -535,7 +552,7 @@ export function GrievanceCenter() {
                   className="bg-[#1D4ED8] hover:bg-blue-700 text-white font-black text-xs px-6 h-10 rounded-xl shadow-md shadow-blue-700/20 gap-2 cursor-pointer transition hover:scale-[1.01]"
                 >
                   <Send className="h-3.5 w-3.5" />
-                  <span>{isSubmitting ? "Submitting…" : "Submit Grievance"}</span>
+                  <span>{isSubmitting ? t("btn_submitting") : t("btn_submit")}</span>
                 </Button>
               </div>
             </form>

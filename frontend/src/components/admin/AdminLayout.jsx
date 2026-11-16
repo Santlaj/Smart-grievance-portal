@@ -19,6 +19,8 @@ import {
   ArrowRight,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
+import LanguageSelector from "../LanguageSelector";
 
 const ADMIN_NAV = [
   { to: "/admin/dashboard", label: "Executive Dashboard", icon: LayoutDashboard },
@@ -198,6 +200,9 @@ export function AdminLayout({ children, title, subtitle }) {
           </div>
 
           <div className="flex items-center gap-3">
+            {/* Language Switcher */}
+            <LanguageSelector />
+
             <div className="flex items-center gap-2 pl-2 pr-3 py-1 rounded-full bg-slate-100/80 border border-slate-200/80 text-xs">
               <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
               <span className="font-semibold text-slate-700">Live HQ Status: Online</span>

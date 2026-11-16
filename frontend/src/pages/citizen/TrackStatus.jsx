@@ -24,12 +24,14 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import CitizenLayout from "../../components/citizen/CitizenLayout";
+import { useLanguage } from "../../context/LanguageContext";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Input";
 import complaintService from "../../services/complaintService";
 import { ComplaintReceiptModal } from "../../components/citizen/ComplaintReceiptModal";
 
 export function TrackStatus() {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -123,11 +125,11 @@ export function TrackStatus() {
               <Compass className="h-4 w-4" />
             </span>
             <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Live Grievance Tracker
+              {t("track_hero_title", "Live Grievance Tracker")}
             </h1>
           </div>
           <p className="text-xs sm:text-sm text-slate-500 mt-1">
-            Track real-time milestone progress, department routing, field officer inspections, and resolution evidence for your complaints.
+            {t("track_hero_subtitle", "Track real-time milestone progress, department routing, field officer inspections, and resolution evidence for your complaints.")}
           </p>
         </div>
 
@@ -140,7 +142,7 @@ export function TrackStatus() {
                 type="text"
                 value={trackingInput}
                 onChange={(e) => setTrackingInput(e.target.value)}
-                placeholder="Enter Grievance Tracking ID (e.g. #GRV-A21C3)..."
+                placeholder={t("track_search_placeholder")}
                 className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-10 pr-4 text-xs font-bold text-slate-800 placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-600 transition"
               />
             </div>
@@ -149,7 +151,7 @@ export function TrackStatus() {
               className="bg-blue-600 hover:bg-blue-700 text-white font-black text-xs px-6 h-11 rounded-xl shadow-xs cursor-pointer gap-2 shrink-0"
             >
               <Compass className="h-4 w-4" />
-              <span>Track Grievance</span>
+              <span>{t("btn_track_now")}</span>
             </Button>
           </form>
 
@@ -157,7 +159,7 @@ export function TrackStatus() {
           {complaints.length > 0 && (
             <div className="pt-2 border-t border-slate-100 space-y-2">
               <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block">
-                Quick Select from your complaints:
+                {t("track_quick_select", "Quick Select from your complaints:")}
               </span>
               <div className="flex flex-wrap items-center gap-2">
                 {complaints.map((c) => {
@@ -200,9 +202,9 @@ export function TrackStatus() {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-lg font-black text-blue-700">{trackingCode}</span>
-                    <Badge variant={selectedComplaint.status}>{selectedComplaint.status}</Badge>
+                    <Badge variant={selectedComplaint.status}>{t(selectedComplaint.status)}</Badge>
                     <Badge variant={selectedComplaint.priority}>
-                      {selectedComplaint.priority} Priority
+                      {t(selectedComplaint.priority)}
                     </Badge>
                   </div>
                   <h2 className="text-lg font-black text-slate-900 mt-1">
@@ -230,12 +232,12 @@ export function TrackStatus() {
                     className="rounded-xl font-bold text-xs gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-800 border-slate-300 cursor-pointer shadow-2xs"
                   >
                     <Printer className="h-3.5 w-3.5 text-blue-700" />
-                    <span>Official Receipt</span>
+                    <span>{t("btn_official_receipt", "Official Receipt")}</span>
                   </Button>
 
                   <Button asChild variant="outline" size="sm" className="rounded-xl font-bold text-xs">
                     <Link to={`/citizen/complaints/${selectedComplaint._id}`}>
-                      <span>Full Details</span>
+                      <span>{t("btn_full_details", "Full Details")}</span>
                       <ArrowRight className="h-3 w-3 ml-1" />
                     </Link>
                   </Button>
@@ -260,7 +262,7 @@ export function TrackStatus() {
               {/* 4-Stage Milestone Stepper */}
               <div className="space-y-6 pt-2">
                 <h3 className="text-xs font-black uppercase tracking-wider text-slate-400">
-                  Resolution Milestone Timeline
+                  {t("track_milestone_timeline", "Resolution Milestone Timeline")}
                 </h3>
 
                 <div className="relative pl-6 space-y-8 before:absolute before:left-2.5 before:top-3 before:bottom-3 before:w-0.5 before:bg-slate-200">
@@ -525,18 +527,18 @@ export function TrackStatus() {
             </div>
             <div>
               <h3 className="font-black text-slate-900 text-base">
-                {trackingInput ? "No Grievance Found" : "No Grievance Selected"}
+                {trackingInput ? t("track_not_found_title", "No Grievance Found") : t("track_empty_title", "No Grievance Selected")}
               </h3>
               <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">
                 {trackingInput
                   ? `Could not find any complaint matching "${trackingInput}". Please check the Tracking ID or select from your reported grievances.`
-                  : "Enter a valid Tracking ID above to view the live milestone resolution stepper."}
+                  : t("track_empty_desc", "Enter a valid Tracking ID above to view the live milestone resolution stepper.")}
               </p>
             </div>
             <div className="pt-2">
               <Button asChild className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl">
                 <Link to="/citizen/raise">
-                  Report New Grievance →
+                  {t("btn_report_new_grievance", "Report New Grievance →")}
                 </Link>
               </Button>
             </div>

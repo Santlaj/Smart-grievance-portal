@@ -5,6 +5,7 @@ const { getIsConnected } = require("../config/db");
 const { inMemoryComplaints } = require("./complaintController");
 const { createNotification } = require("./notificationController");
 const { assertOwnedUpload, isStorageKey } = require("../lib/cloudinaryStorage");
+const { translateText } = require("../utils/translationService");
 
 // Helper to resolve Department model ID for a department name or keyword
 async function resolveDepartment(deptName) {
@@ -353,6 +354,23 @@ const updateComplaintStatus = async (req, res) => {
         });
       }
 
+      // Auto-translate officer remarks into citizen's preferred language
+      const effectiveRemarks = remarks || complaint.remarks;
+      if (effectiveRemarks && typeof effectiveRemarks === "string" && effectiveRemarks.trim()) {
+        const citizenLang = complaint.citizenPreferredLanguage || complaint.originalLanguage || "en";
+        if (citizenLang && citizenLang !== "en") {
+          try {
+            const translatedRemark = await translateText(effectiveRemarks.trim(), citizenLang, "en");
+            if (!complaint.remarksTranslations) {
+              complaint.remarksTranslations = new Map();
+            }
+            complaint.remarksTranslations.set(citizenLang, translatedRemark);
+          } catch (tErr) {
+            console.warn("Auto-translating officer remark failed:", tErr);
+          }
+        }
+      }
+
       await complaint.save();
 
       // Notify citizen of the update
@@ -384,7 +402,17 @@ const updateComplaintStatus = async (req, res) => {
     const item = inMemoryComplaints.find((c) => String(c._id) === String(req.params.id));
     if (item) {
       if (status) item.status = status;
-      if (remarks) item.remarks = remarks;
+      if (remarks) {
+        item.remarks = remarks;
+        const citizenLang = item.citizenPreferredLanguage || item.originalLanguage || "en";
+        if (citizenLang && citizenLang !== "en") {
+          try {
+            const translatedRemark = await translateText(remarks.trim(), citizenLang, "en");
+            item.remarksTranslations = item.remarksTranslations || {};
+            item.remarksTranslations[citizenLang] = translatedRemark;
+          } catch (tErr) {}
+        }
+      }
       if (resolutionImage) item.resolutionImage = resolutionImage;
       if (aiAction === "confirm") {
         item.status = "Accepted and Assigned";

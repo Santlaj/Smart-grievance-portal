@@ -3,10 +3,13 @@ import { Link, useNavigate } from "react-router-dom";
 import GovernmentSidebar from "./GovernmentSidebar";
 import { Bell, Shield, Search, User, Calendar, ChevronDown } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import notificationService from "../../services/notificationService";
+import LanguageSelector from "../LanguageSelector";
 
 export function GovernmentLayout({ children, title, subtitle }) {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [unreadCount, setUnreadCount] = useState(0);
 
@@ -66,6 +69,9 @@ export function GovernmentLayout({ children, title, subtitle }) {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
+            {/* Language Switcher */}
+            <LanguageSelector />
+
             {/* Date Pill */}
             <div className="hidden md:flex items-center gap-1.5 rounded-full bg-white border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600 shadow-2xs">
               <Calendar className="h-3.5 w-3.5 text-slate-400" />

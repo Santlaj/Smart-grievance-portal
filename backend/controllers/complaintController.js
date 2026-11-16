@@ -6,6 +6,7 @@ const { createNotification } = require("./notificationController");
 const { inMemoryUsers } = require("./authController");
 const { validateCivicComplaint } = require("../utils/aiComplaintValidator");
 const { assertOwnedUpload, getImageDataUrl, isStorageKey } = require("../lib/cloudinaryStorage");
+const { detectLanguage, translateComplaint } = require("../utils/translationService");
 
 let inMemoryComplaints = [];
 
@@ -124,10 +125,44 @@ const submitComplaint = async (req, res) => {
 
       const complaintNumber = `GRV${Math.floor(100 + Math.random() * 900)}`;
 
+      // Multilingual script detection & automated English translation pipeline
+      const detectedLanguage = detectLanguage(`${title} ${description}`);
+      const citizenPreferredLang = req.body.language || req.user?.preferredLanguage || detectedLanguage || "en";
+      let translatedTitle = title.trim();
+      let translatedDescription = description.trim();
+      let translationStatus = "original";
+      const translationsMap = new Map();
+
+      if (detectedLanguage !== "en") {
+        try {
+          const tRes = await translateComplaint(
+            { title: title.trim(), description: description.trim(), originalLanguage: detectedLanguage },
+            "en"
+          );
+          translatedTitle = tRes.translatedTitle || title.trim();
+          translatedDescription = tRes.translatedDescription || description.trim();
+          translationStatus = "translated";
+          translationsMap.set("en", {
+            title: translatedTitle,
+            description: translatedDescription,
+          });
+        } catch (tErr) {
+          console.warn("Complaint auto-translation failed:", tErr);
+          translationStatus = "failed";
+        }
+      }
+
       const complaint = await Complaint.create({
         complaintNumber,
         title: title.trim(),
         description: description.trim(),
+        originalLanguage: detectedLanguage,
+        citizenPreferredLanguage: citizenPreferredLang,
+        translatedTitle,
+        translatedDescription,
+        translations: translationsMap,
+        translationStatus,
+        remarksTranslations: new Map(),
         category: aiValidation.detectedCategory || category || "General",
         department: departmentRecord._id,
         assignedOfficer: designatedOfficer ? designatedOfficer._id : null,
@@ -228,11 +263,43 @@ const submitComplaint = async (req, res) => {
 
     const initialStatus = aiValidation.status || (inMemOfficer ? "Accepted and Assigned" : "Submitted — Awaiting Validation");
 
+    const inMemDetectedLang = detectLanguage(`${title} ${description}`);
+    const inMemCitizenLang = req.body.language || req.user?.preferredLanguage || inMemDetectedLang || "en";
+    let inMemTransTitle = title.trim();
+    let inMemTransDesc = description.trim();
+    let inMemTransStatus = "original";
+    const inMemTranslations = {};
+
+    if (inMemDetectedLang !== "en") {
+      try {
+        const inMemTRes = await translateComplaint(
+          { title: title.trim(), description: description.trim(), originalLanguage: inMemDetectedLang },
+          "en"
+        );
+        inMemTransTitle = inMemTRes.translatedTitle || title.trim();
+        inMemTransDesc = inMemTRes.translatedDescription || description.trim();
+        inMemTransStatus = "translated";
+        inMemTranslations.en = {
+          title: inMemTransTitle,
+          description: inMemTransDesc,
+        };
+      } catch (err) {
+        inMemTransStatus = "failed";
+      }
+    }
+
     const newComplaint = {
       _id: "comp_" + Date.now(),
       complaintNumber: `GRV${Math.floor(100 + Math.random() * 900)}`,
       title: title.trim(),
       description: description.trim(),
+      originalLanguage: inMemDetectedLang,
+      citizenPreferredLanguage: inMemCitizenLang,
+      translatedTitle: inMemTransTitle,
+      translatedDescription: inMemTransDesc,
+      translations: inMemTranslations,
+      translationStatus: inMemTransStatus,
+      remarksTranslations: {},
       category: aiValidation.detectedCategory || category || "General",
       department: {
         _id: "dept_" + matchedDeptName.toLowerCase().replace(/[^a-z0-9]/g, "_"),

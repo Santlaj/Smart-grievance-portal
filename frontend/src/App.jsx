@@ -2,7 +2,9 @@ import { lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import { AuthProvider } from "./context/AuthContext";
+import { LanguageProvider } from "./context/LanguageContext";
 import ProtectedRoute from "./components/ProtectedRoute";
+import CivicSaathi from "./components/CivicSaathi";
 
 // Public Pages
 const Home = lazy(() => import("./pages/Home"));
@@ -14,7 +16,10 @@ const CitizenDashboard = lazy(() => import("./pages/citizen/CitizenDashboard"));
 const TrackStatus = lazy(() => import("./pages/citizen/TrackStatus"));
 const ComplaintDetails = lazy(() => import("./pages/citizen/ComplaintDetails"));
 const Profile = lazy(() => import("./pages/citizen/Profile"));
+const CitizenSettings = lazy(() => import("./pages/citizen/CitizenSettings"));
 const GrievanceCenter = lazy(() => import("./pages/citizen/GrievanceCenter"));
+const RaiseComplaint = lazy(() => import("./pages/citizen/RaiseComplaint"));
+const MyComplaints = lazy(() => import("./pages/citizen/MyComplaints"));
 const Notifications = lazy(() => import("./pages/citizen/Notifications"));
 
 // Government Portal Pages
@@ -33,10 +38,11 @@ const AdminDirectives = lazy(() => import("./pages/admin/AdminDirectives"));
 
 export function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Toaster position="top-right" richColors />
-        <Suspense fallback={<div role="status" className="p-6 text-center">Loading...</div>}>
+    <LanguageProvider>
+      <AuthProvider>
+        <BrowserRouter>
+          <Toaster position="top-right" richColors />
+          <Suspense fallback={<div role="status" className="p-6 text-center">Loading...</div>}>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<Home />} />
@@ -64,7 +70,7 @@ export function App() {
               path="/citizen/raise"
               element={
                 <ProtectedRoute allowedRoles={["citizen"]}>
-                  <GrievanceCenter />
+                  <RaiseComplaint />
                 </ProtectedRoute>
               }
             />
@@ -72,7 +78,7 @@ export function App() {
               path="/citizen/complaints"
               element={
                 <ProtectedRoute allowedRoles={["citizen"]}>
-                  <GrievanceCenter />
+                  <MyComplaints />
                 </ProtectedRoute>
               }
             />
@@ -101,6 +107,14 @@ export function App() {
               element={
                 <ProtectedRoute allowedRoles={["citizen"]}>
                   <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/citizen/settings"
+              element={
+                <ProtectedRoute allowedRoles={["citizen"]}>
+                  <CitizenSettings />
                 </ProtectedRoute>
               }
             />
@@ -172,6 +186,8 @@ export function App() {
             <Route path="/raise-complaint" element={<Navigate to="/citizen/raise" replace />} />
             <Route path="/my-complaints" element={<Navigate to="/citizen/complaints" replace />} />
             <Route path="/complaint/:id" element={<Navigate to="/citizen/complaints/:id" replace />} />
+            <Route path="/profile" element={<Navigate to="/citizen/profile" replace />} />
+            <Route path="/settings" element={<Navigate to="/citizen/settings" replace />} />
             <Route path="/officer" element={<Navigate to="/government/dashboard" replace />} />
             <Route path="/officer/assigned" element={<Navigate to="/government/complaints" replace />} />
             {/* Administrator Portal (Protected strictly for role: admin) */}
@@ -213,8 +229,10 @@ export function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
+        <CivicSaathi />
       </BrowserRouter>
     </AuthProvider>
+    </LanguageProvider>
   );
 }
 

@@ -43,10 +43,12 @@ import {
 import { toast } from "sonner";
 import GovernmentLayout from "../../components/government/GovernmentLayout";
 import { Button } from "../../components/ui/Button";
+import ComplaintTranslationCard from "../../components/ComplaintTranslationCard";
 import { Input, Badge, Textarea, Label } from "../../components/ui/Input";
 import complaintService from "../../services/complaintService";
 import { uploadEvidence } from "../../services/uploadService";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 // Canonical Municipal Departments & Divisions with clean, highlight-focused executive styling
 const CANONICAL_DIVISIONS = [
@@ -130,6 +132,7 @@ function getComplaintDivisionId(c) {
 }
 
 export function AssignedComplaints() {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryId = searchParams.get("id");
   const queryDept = searchParams.get("department");
@@ -454,14 +457,17 @@ export function AssignedComplaints() {
                     </div>
                   </div>
 
-                  <div className="space-y-1">
-                    <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                      Grievance Description
-                    </h3>
-                    <p className="text-xs text-slate-700 leading-relaxed whitespace-pre-line bg-slate-50 p-3.5 rounded-xl border border-slate-100">
-                      {activeComplaint.description}
-                    </p>
-                  </div>
+                  {/* Multilingual Dual-View Complaint Card */}
+                  <ComplaintTranslationCard
+                    complaint={activeComplaint}
+                    onUpdate={(updated) => {
+                      setActiveComplaint(updated);
+                      setComplaints((prev) =>
+                        prev.map((c) => (String(c._id) === String(updated._id) ? updated : c))
+                      );
+                    }}
+                    isOfficer={true}
+                  />
 
                   {/* Evidence Photo */}
                   <div className="space-y-2">

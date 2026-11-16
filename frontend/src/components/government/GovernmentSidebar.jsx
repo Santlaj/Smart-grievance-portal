@@ -15,10 +15,12 @@ import {
   Megaphone,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 export function GovernmentSidebar() {
   const location = useLocation();
   const { user, logout } = useAuth();
+  const { t } = useLanguage();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const cleanName = user?.name ? user.name.replace(/\s*\(Officer\)/i, "").trim() : "Government Official";
@@ -27,19 +29,19 @@ export function GovernmentSidebar() {
     : (user?.department ? user.department : "Department Officer");
 
   const navItems = [
-    { to: "/government/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { to: "/government/dashboard", label: t("nav_dashboard"), icon: LayoutDashboard },
     {
       to: "/government/complaints",
-      label: user?.role === "admin" ? "Department Queues" : "Department Queue",
+      label: user?.role === "admin" ? t("gov_assigned_queue") : t("gov_assigned_queue"),
       icon: ClipboardList,
     },
     ...(user?.role === "admin"
-      ? [{ to: "/admin/officers", label: "Department Officers & Powers", icon: Users }]
+      ? [{ to: "/admin/officers", label: "Department Officers & Powers", icon: ShieldCheck }]
       : []),
-    { to: "/government/ai-review", label: "AI Review Center", icon: Sparkles },
-    { to: "/government/reports", label: "Reports", icon: FileBarChart },
-    { to: "/government/announcements", label: "Directives & Notices", icon: Megaphone },
-    { to: "/government/settings", label: "Settings", icon: Settings },
+    { to: "/government/ai-review", label: t("gov_ai_review"), icon: Sparkles },
+    { to: "/government/reports", label: t("gov_reports"), icon: FileBarChart },
+    { to: "/government/announcements", label: t("gov_announcements"), icon: Megaphone },
+    { to: "/government/settings", label: t("nav_settings"), icon: Settings },
   ];
 
   const sidebarContent = (
@@ -147,7 +149,7 @@ export function GovernmentSidebar() {
           className="flex items-center gap-2 text-xs font-bold text-rose-400 hover:text-rose-300 transition-colors px-2 pt-1 cursor-pointer"
         >
           <LogOut className="h-4 w-4" />
-          <span>Logout</span>
+          <span>{t("nav_logout")}</span>
         </button>
       </div>
     </div>

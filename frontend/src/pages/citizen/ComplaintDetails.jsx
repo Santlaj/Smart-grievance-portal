@@ -31,11 +31,14 @@ import { toast } from "sonner";
 import CitizenLayout from "../../components/citizen/CitizenLayout";
 import { Button } from "../../components/ui/Button";
 import { Badge } from "../../components/ui/Input";
+import { useLanguage } from "../../context/LanguageContext";
 import complaintService from "../../services/complaintService";
 import { ComplaintReceiptModal } from "../../components/citizen/ComplaintReceiptModal";
+import ComplaintTranslationCard from "../../components/ComplaintTranslationCard";
 
 export function ComplaintDetails() {
   const { id } = useParams();
+  const { t } = useLanguage();
   const [complaint, setComplaint] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -585,6 +588,16 @@ export function ComplaintDetails() {
                   {complaint.description}
                 </p>
               </div>
+
+              {/* Multilingual Translation Dual-View Card */}
+              {complaint && (
+                <div className="pt-2">
+                  <ComplaintTranslationCard
+                    complaint={complaint}
+                    onUpdate={(updated) => setComplaint(updated)}
+                  />
+                </div>
+              )}
 
               {/* Location Card */}
               <div className="space-y-2">

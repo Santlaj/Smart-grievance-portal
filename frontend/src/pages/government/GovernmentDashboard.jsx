@@ -24,6 +24,7 @@ import GovernmentLayout from "../../components/government/GovernmentLayout";
 import { Badge } from "../../components/ui/Input";
 import { Button } from "../../components/ui/Button";
 import { useAuth } from "../../context/AuthContext";
+import { useLanguage } from "../../context/LanguageContext";
 import complaintService from "../../services/complaintService";
 import governmentBanner from "../../assets/government-banner.jpg";
 
@@ -104,6 +105,7 @@ function getComplaintDivisionId(c) {
 
 export function GovernmentDashboard() {
   const { user } = useAuth();
+  const { t } = useLanguage();
   const [complaints, setComplaints] = useState([]);
   const [loading, setLoading] = useState(true);
 
