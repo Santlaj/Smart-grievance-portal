@@ -10,6 +10,7 @@ import CivicSaathi from "./components/CivicSaathi";
 const Home = lazy(() => import("./pages/Home"));
 const Login = lazy(() => import("./pages/Login"));
 const Register = lazy(() => import("./pages/Register"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
 
 // Citizen Portal Pages
 const CitizenDashboard = lazy(() => import("./pages/citizen/CitizenDashboard"));
@@ -48,6 +49,8 @@ export function App() {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ForgotPassword />} />
 
             {/* Citizen Portal (Protected for citizens) */}
             <Route

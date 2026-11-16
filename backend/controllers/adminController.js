@@ -1,10 +1,11 @@
+const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const Complaint = require("../models/Complaint");
 const User = require("../models/User");
 const Department = require("../models/Department");
 const Announcement = require("../models/Announcement");
 const { getIsConnected } = require("../config/db");
-const { inMemoryComplaints } = require("./complaintController");
+const { inMemoryComplaints, persistComplaints } = require("../lib/inMemoryStore");
 const { inMemoryUsers } = require("./authController");
 const { inMemoryDepartments } = require("./departmentController");
 const { createNotification } = require("./notificationController");
@@ -188,7 +189,7 @@ const assignOfficer = async (req, res) => {
   try {
     const { complaintId, officerId } = req.body;
 
-    if (getIsConnected()) {
+    if (getIsConnected() && mongoose.Types.ObjectId.isValid(complaintId)) {
       const complaint = await Complaint.findById(complaintId);
       if (complaint) {
         complaint.assignedOfficer = officerId;
@@ -206,6 +207,7 @@ const assignOfficer = async (req, res) => {
       const officer = inMemoryUsers.find((u) => String(u._id) === String(officerId));
       item.assignedOfficer = officer ? { _id: officer._id, name: officer.name, email: officer.email } : null;
       item.status = "Assigned";
+      persistComplaints();
       return res.status(200).json({
         message: "Officer assigned successfully",
         complaint: item,

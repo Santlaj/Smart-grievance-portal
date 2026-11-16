@@ -53,6 +53,16 @@ const userSchema = new mongoose.Schema(
       enum: ["en", "hi", "pa", "bn", "ta", "te", "mr", "gu"],
       default: "en",
     },
+
+    resetPasswordOtp: {
+      type: String,
+      default: null,
+    },
+
+    resetPasswordExpires: {
+      type: Date,
+      default: null,
+    },
   },
   {
     timestamps: true,

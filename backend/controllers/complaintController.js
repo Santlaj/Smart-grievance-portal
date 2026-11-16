@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Complaint = require("../models/Complaint");
 const Department = require("../models/Department");
 const User = require("../models/User");
@@ -7,8 +8,20 @@ const { inMemoryUsers } = require("./authController");
 const { validateCivicComplaint } = require("../utils/aiComplaintValidator");
 const { assertOwnedUpload, getImageDataUrl, isStorageKey } = require("../lib/cloudinaryStorage");
 const { detectLanguage, translateComplaint } = require("../utils/translationService");
+const { inMemoryComplaints, persistComplaints } = require("../lib/inMemoryStore");
 
-let inMemoryComplaints = [];
+// Helper to check citizen ownership matching either user._id or email
+const isCitizenMatch = (citizenField, user) => {
+  if (!user) return false;
+  const userId = String(user._id || "");
+  const userEmail = user.email ? user.email.toLowerCase() : "";
+  const citizenId = String(citizenField?._id || citizenField || "");
+  const citizenEmail = citizenField?.email ? citizenField.email.toLowerCase() : "";
+  return (
+    (userId && citizenId && userId === citizenId) ||
+    (userEmail && citizenEmail && userEmail === citizenEmail)
+  );
+};
 
 // Helper to resolve Department model ID for a department name or keyword
 async function resolveDepartment(deptName) {
@@ -355,6 +368,7 @@ const submitComplaint = async (req, res) => {
     };
 
     inMemoryComplaints.unshift(newComplaint);
+    persistComplaints();
     return res.status(201).json(newComplaint);
   } catch (error) {
     console.error("Submit Complaint Error:", error);
@@ -390,9 +404,13 @@ const getMyComplaints = async (req, res) => {
       return res.status(200).json(complaints);
     }
 
-    let myItems = inMemoryComplaints.filter(
-      (c) => String(c.citizen?._id || c.citizen) === String(req.user._id)
-    );
+    const userId = String(req.user._id || "");
+    const userEmail = String(req.user.email || "").toLowerCase();
+    let myItems = inMemoryComplaints.filter((c) => {
+      const cId = String(c.citizen?._id || c.citizen || "");
+      const cEmail = String(c.citizen?.email || "").toLowerCase();
+      return (userId && cId === userId) || (userEmail && cEmail === userEmail);
+    });
 
     if (history === "true") {
       myItems = myItems.filter((c) => c.isClosed === true || c.status === "Closed");
@@ -410,13 +428,18 @@ const getMyComplaints = async (req, res) => {
 const getComplaintById = async (req, res) => {
   try {
     let complaint = null;
-    if (getIsConnected()) {
+    if (getIsConnected() && mongoose.Types.ObjectId.isValid(req.params.id)) {
       complaint = await Complaint.findById(req.params.id)
         .populate("citizen", "name email")
         .populate("department", "departmentName")
         .populate("assignedOfficer", "name email");
-    } else {
-      complaint = inMemoryComplaints.find((c) => String(c._id) === String(req.params.id));
+    }
+    if (!complaint) {
+      complaint = inMemoryComplaints.find(
+        (c) =>
+          String(c._id) === String(req.params.id) ||
+          String(c.complaintNumber || "").toLowerCase() === String(req.params.id).toLowerCase()
+      );
     }
 
     if (!complaint) {
@@ -426,10 +449,7 @@ const getComplaintById = async (req, res) => {
     // Role-based authorization: officers & admins can view assigned / permitted;
     // Citizens can ONLY view their own filed complaints.
     const isOfficer = req.user.role === "officer" || req.user.role === "admin";
-    const citizenId = complaint.citizen?._id ? String(complaint.citizen._id) : String(complaint.citizen);
-    const requesterId = String(req.user._id);
-
-    if (!isOfficer && citizenId !== requesterId) {
+    if (!isOfficer && !isCitizenMatch(complaint.citizen, req.user)) {
       return res.status(403).json({
         message: "Access denied. Citizens can only view complaints they are authorized to access.",
       });
@@ -453,11 +473,13 @@ const confirmSatisfaction = async (req, res) => {
 
     const isSatisfied = Boolean(satisfied);
 
-    if (getIsConnected()) {
-      const complaint = await Complaint.findById(id);
-      if (!complaint) return res.status(404).json({ message: "Complaint not found." });
+    let complaint = null;
+    if (getIsConnected() && mongoose.Types.ObjectId.isValid(id)) {
+      complaint = await Complaint.findById(id);
+    }
 
-      if (String(complaint.citizen) !== String(req.user._id)) {
+    if (complaint) {
+      if (!isCitizenMatch(complaint.citizen, req.user)) {
         return res.status(403).json({ message: "Unauthorized: You can only confirm satisfaction for your own complaints." });
       }
 
@@ -555,8 +577,7 @@ const confirmSatisfaction = async (req, res) => {
     // In-memory fallback
     const item = inMemoryComplaints.find((c) => String(c._id) === String(id));
     if (!item) return res.status(404).json({ message: "Complaint not found." });
-    const citizenId = item.citizen?._id || item.citizen;
-    if (String(citizenId) !== String(req.user._id)) {
+    if (!isCitizenMatch(item.citizen, req.user)) {
       return res.status(403).json({ message: "Unauthorized: You can only confirm satisfaction for your own complaints." });
     }
 
@@ -578,6 +599,7 @@ const confirmSatisfaction = async (req, res) => {
         description: "Citizen confirmed satisfaction.",
         completed: true,
       });
+      persistComplaints();
       return res.status(200).json({ message: "Complaint closed successfully.", complaint: item });
     } else {
       const reasonText = (reopenReason || feedbackComment || "Reopened by citizen").trim();
@@ -592,6 +614,7 @@ const confirmSatisfaction = async (req, res) => {
         description: reasonText,
         completed: false,
       });
+      persistComplaints();
       return res.status(200).json({ message: "Complaint reopened successfully.", complaint: item });
     }
   } catch (error) {
@@ -620,11 +643,13 @@ const provideMoreInfo = async (req, res) => {
       return res.status(400).json({ message: "Upload evidence images through the evidence upload endpoint." });
     }
 
-    if (getIsConnected()) {
-      const complaint = await Complaint.findById(id);
-      if (!complaint) return res.status(404).json({ message: "Complaint not found." });
+    let complaint = null;
+    if (getIsConnected() && mongoose.Types.ObjectId.isValid(id)) {
+      complaint = await Complaint.findById(id);
+    }
 
-      if (String(complaint.citizen) !== String(req.user._id)) {
+    if (complaint) {
+      if (!isCitizenMatch(complaint.citizen, req.user)) {
         return res.status(403).json({ message: "Unauthorized." });
       }
 
@@ -660,8 +685,7 @@ const provideMoreInfo = async (req, res) => {
 
     const item = inMemoryComplaints.find((c) => String(c._id) === String(id));
     if (item) {
-      const citizenId = item.citizen?._id || item.citizen;
-      if (String(citizenId) !== String(req.user._id)) {
+      if (!isCitizenMatch(item.citizen, req.user)) {
         return res.status(403).json({ message: "Unauthorized." });
       }
       item.description = `${item.description}\n\n[Citizen Additional Information]: ${additionalDetails.trim()}`;
@@ -673,6 +697,7 @@ const provideMoreInfo = async (req, res) => {
         description: additionalDetails.trim(),
         completed: true,
       });
+      persistComplaints();
       return res.status(200).json({ message: "Information submitted.", complaint: item });
     }
 
@@ -685,10 +710,13 @@ const provideMoreInfo = async (req, res) => {
 // ====================== Delete Complaint ======================
 const deleteComplaint = async (req, res) => {
   try {
-    if (getIsConnected()) {
-      const complaint = await Complaint.findById(req.params.id);
-      if (!complaint) return res.status(404).json({ message: "Complaint not found" });
-      if (String(complaint.citizen) !== String(req.user._id)) {
+    let complaint = null;
+    if (getIsConnected() && mongoose.Types.ObjectId.isValid(req.params.id)) {
+      complaint = await Complaint.findById(req.params.id);
+    }
+
+    if (complaint) {
+      if (!isCitizenMatch(complaint.citizen, req.user)) {
         return res.status(403).json({ message: "Unauthorized to delete this complaint." });
       }
       if (complaint.isClosed || complaint.status === "Closed") {
@@ -698,16 +726,19 @@ const deleteComplaint = async (req, res) => {
       return res.status(200).json({ message: "Complaint deleted successfully" });
     }
 
-    const complaint = inMemoryComplaints.find((c) => String(c._id) === String(req.params.id));
-    if (!complaint) return res.status(404).json({ message: "Complaint not found" });
-    const citizenId = complaint.citizen?._id || complaint.citizen;
-    if (String(citizenId) !== String(req.user._id)) {
+    const complaintItem = inMemoryComplaints.find((c) => String(c._id) === String(req.params.id));
+    if (!complaintItem) return res.status(404).json({ message: "Complaint not found" });
+    if (!isCitizenMatch(complaintItem.citizen, req.user)) {
       return res.status(403).json({ message: "Unauthorized to delete this complaint." });
     }
-    if (complaint.isClosed || complaint.status === "Closed") {
+    if (complaintItem.isClosed || complaintItem.status === "Closed") {
       return res.status(400).json({ message: "Closed complaints are preserved in official archive and cannot be deleted." });
     }
-    inMemoryComplaints = inMemoryComplaints.filter((c) => String(c._id) !== String(req.params.id));
+    const delIdx = inMemoryComplaints.findIndex((c) => String(c._id) === String(req.params.id));
+    if (delIdx !== -1) {
+      inMemoryComplaints.splice(delIdx, 1);
+      persistComplaints();
+    }
     return res.status(200).json({ message: "Complaint deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -723,11 +754,13 @@ const submitFeedback = async (req, res) => {
       return res.status(400).json({ message: "Rating must be between 1 and 5 stars" });
     }
 
-    if (getIsConnected()) {
-      const complaint = await Complaint.findById(req.params.id);
-      if (!complaint) return res.status(404).json({ message: "Complaint not found" });
+    let complaint = null;
+    if (getIsConnected() && mongoose.Types.ObjectId.isValid(req.params.id)) {
+      complaint = await Complaint.findById(req.params.id);
+    }
 
-      if (String(complaint.citizen) !== String(req.user._id)) {
+    if (complaint) {
+      if (!isCitizenMatch(complaint.citizen, req.user)) {
         return res.status(403).json({ message: "Unauthorized to submit feedback on this complaint" });
       }
 
@@ -760,8 +793,7 @@ const submitFeedback = async (req, res) => {
 
     const item = inMemoryComplaints.find((c) => String(c._id) === String(req.params.id));
     if (item) {
-      const citizenId = item.citizen?._id || item.citizen;
-      if (String(citizenId) !== String(req.user._id)) {
+      if (!isCitizenMatch(item.citizen, req.user)) {
         return res.status(403).json({ message: "Unauthorized to submit feedback on this complaint" });
       }
       item.feedback = {
@@ -776,6 +808,7 @@ const submitFeedback = async (req, res) => {
         description: comment ? `Citizen review: "${comment.trim()}"` : `Rated ${parsedRating} stars by citizen.`,
         completed: true,
       });
+      persistComplaints();
       return res.status(200).json({ message: "Citizen rating submitted successfully", feedback: item.feedback });
     }
 
@@ -793,11 +826,13 @@ const reopenComplaint = async (req, res) => {
       return res.status(400).json({ message: "Please specify the reason for re-opening this grievance" });
     }
 
-    if (getIsConnected()) {
-      const complaint = await Complaint.findById(req.params.id);
-      if (!complaint) return res.status(404).json({ message: "Complaint not found" });
+    let complaint = null;
+    if (getIsConnected() && mongoose.Types.ObjectId.isValid(req.params.id)) {
+      complaint = await Complaint.findById(req.params.id);
+    }
 
-      if (String(complaint.citizen) !== String(req.user._id)) {
+    if (complaint) {
+      if (!isCitizenMatch(complaint.citizen, req.user)) {
         return res.status(403).json({ message: "Unauthorized to re-open this complaint" });
       }
 
@@ -831,8 +866,7 @@ const reopenComplaint = async (req, res) => {
 
     const item = inMemoryComplaints.find((c) => String(c._id) === String(req.params.id));
     if (item) {
-      const citizenId = item.citizen?._id || item.citizen;
-      if (String(citizenId) !== String(req.user._id)) {
+      if (!isCitizenMatch(item.citizen, req.user)) {
         return res.status(403).json({ message: "Unauthorized to re-open this complaint" });
       }
       item.status = "Reopened";
@@ -847,6 +881,7 @@ const reopenComplaint = async (req, res) => {
         description: `Citizen requested re-examination: "${reason.trim()}"`,
         completed: false,
       });
+      persistComplaints();
       return res.status(200).json({ message: "Grievance re-opened successfully", complaint: item });
     }
 

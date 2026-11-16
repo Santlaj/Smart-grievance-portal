@@ -1,0 +1,462 @@
+[
+  {
+    "_id": "comp_1794834513067",
+    "complaintNumber": "GRV869",
+    "title": "Test Potholes on Main Road",
+    "description": "Large deep potholes near the crossroad",
+    "originalLanguage": "en",
+    "citizenPreferredLanguage": "en",
+    "translatedTitle": "Test Potholes on Main Road",
+    "translatedDescription": "Large deep potholes near the crossroad",
+    "translations": {},
+    "translationStatus": "original",
+    "remarksTranslations": {},
+    "category": "Roads & Infrastructure",
+    "department": {
+      "_id": "dept_roads___infrastructure",
+      "departmentName": "Roads & Infrastructure"
+    },
+    "citizen": {
+      "_id": "660000000000000000000001",
+      "name": "Ramesh Sharma",
+      "email": "citizen@example.com"
+    },
+    "assignedOfficer": {
+      "_id": "660000000000000000000002",
+      "name": "Rajesh Sharma",
+      "email": "officer.roads@example.com"
+    },
+    "location": "Sector 14 Crossroad",
+    "priority": "High",
+    "status": "Needs More Information",
+    "isClosed": false,
+    "image": "",
+    "evidenceAnalysis": {
+      "imageIntegrity": "Missing Photo",
+      "confidence": "Medium",
+      "duplicateRisk": "Low",
+      "dHash": ""
+    },
+    "aiFlag": "Needs More Information from Citizen",
+    "authenticityScore": 50,
+    "aiValidation": {
+      "isValidCivic": false,
+      "classificationConfidence": 95,
+      "detectedCategory": "Roads & Infrastructure",
+      "recommendedDepartment": "Roads Department",
+      "imageRelevance": "Missing Photo",
+      "authenticityScore": 50,
+      "evidenceAnalysis": {
+        "imageIntegrity": "Missing Photo",
+        "confidence": "Medium",
+        "duplicateRisk": "Low",
+        "dHash": ""
+      },
+      "duplicateProbability": 0,
+      "isPossibleDuplicate": false,
+      "matchingComplaints": [],
+      "warnings": [
+        "Complaint text matches placeholder or test pattern (\"Test Potholes on Mai\").",
+        "No photographic evidence provided; on-site physical verification required."
+      ],
+      "explanation": "Complaint description is incomplete or lacks actionable civic details.",
+      "recommendedAction": "Request More Information",
+      "status": "Needs More Information",
+      "analyzedAt": "2026-11-16T13:08:33.067Z"
+    },
+    "analysisReasons": [
+      "Complaint text matches placeholder or test pattern (\"Test Potholes on Mai\").",
+      "No photographic evidence provided; on-site physical verification required."
+    ],
+    "timeline": [
+      {
+        "title": "Complaint Submitted",
+        "timestamp": "2026-11-16T13:08:33.067Z",
+        "description": "Citizen submitted grievance. Initial AI triage completed.",
+        "completed": true
+      },
+      {
+        "title": "AI Classification & Validation (95% Confidence)",
+        "timestamp": "2026-11-16T13:08:33.067Z",
+        "description": "Categorized under \"Roads & Infrastructure\". Recommended department: \"Roads & Infrastructure\". Complaint description is incomplete or lacks actionable civic details.",
+        "completed": true
+      },
+      {
+        "title": "Accepted & Assigned to Rajesh Sharma",
+        "timestamp": "2026-11-16T13:08:33.067Z",
+        "description": "Routed to Roads & Infrastructure queue. Assigned officer: Rajesh Sharma (officer.roads@example.com).",
+        "completed": true
+      },
+      {
+        "title": "Officer Requested More Information",
+        "timestamp": "2026-11-16T13:08:33.072Z",
+        "description": "done",
+        "completed": false
+      }
+    ],
+    "createdAt": "2026-11-16T13:08:33.067Z",
+    "updatedAt": "2026-11-16T13:08:33.067Z",
+    "remarks": "done",
+    "moreInfoRequested": {
+      "requested": true,
+      "requestedAt": "2026-11-16T13:08:33.072Z",
+      "reason": "done"
+    }
+  },
+  {
+    "_id": "comp_1794834197163",
+    "complaintNumber": "GRV267",
+    "title": "Test Potholes on Main Road",
+    "description": "Large deep potholes near the crossroad",
+    "originalLanguage": "en",
+    "citizenPreferredLanguage": "en",
+    "translatedTitle": "Test Potholes on Main Road",
+    "translatedDescription": "Large deep potholes near the crossroad",
+    "translations": {},
+    "translationStatus": "original",
+    "remarksTranslations": {},
+    "category": "Roads & Infrastructure",
+    "department": {
+      "_id": "dept_roads___infrastructure",
+      "departmentName": "Roads & Infrastructure"
+    },
+    "citizen": {
+      "_id": "660000000000000000000001",
+      "name": "Ramesh Sharma",
+      "email": "citizen@example.com"
+    },
+    "assignedOfficer": {
+      "_id": "660000000000000000000002",
+      "name": "Rajesh Sharma",
+      "email": "officer.roads@example.com"
+    },
+    "location": "Sector 14 Crossroad",
+    "priority": "High",
+    "status": "Needs More Information",
+    "isClosed": false,
+    "image": "",
+    "evidenceAnalysis": {
+      "imageIntegrity": "Missing Photo",
+      "confidence": "Medium",
+      "duplicateRisk": "Low",
+      "dHash": ""
+    },
+    "aiFlag": "Needs More Information from Citizen",
+    "authenticityScore": 50,
+    "aiValidation": {
+      "isValidCivic": false,
+      "classificationConfidence": 95,
+      "detectedCategory": "Roads & Infrastructure",
+      "recommendedDepartment": "Roads Department",
+      "imageRelevance": "Missing Photo",
+      "authenticityScore": 50,
+      "evidenceAnalysis": {
+        "imageIntegrity": "Missing Photo",
+        "confidence": "Medium",
+        "duplicateRisk": "Low",
+        "dHash": ""
+      },
+      "duplicateProbability": 0,
+      "isPossibleDuplicate": false,
+      "matchingComplaints": [],
+      "warnings": [
+        "Complaint text matches placeholder or test pattern (\"Test Potholes on Mai\").",
+        "No photographic evidence provided; on-site physical verification required."
+      ],
+      "explanation": "Complaint description is incomplete or lacks actionable civic details.",
+      "recommendedAction": "Request More Information",
+      "status": "Needs More Information",
+      "analyzedAt": "2026-11-16T13:03:17.163Z"
+    },
+    "analysisReasons": [
+      "Complaint text matches placeholder or test pattern (\"Test Potholes on Mai\").",
+      "No photographic evidence provided; on-site physical verification required."
+    ],
+    "timeline": [
+      {
+        "title": "Complaint Submitted",
+        "timestamp": "2026-11-16T13:03:17.164Z",
+        "description": "Citizen submitted grievance. Initial AI triage completed.",
+        "completed": true
+      },
+      {
+        "title": "AI Classification & Validation (95% Confidence)",
+        "timestamp": "2026-11-16T13:03:17.164Z",
+        "description": "Categorized under \"Roads & Infrastructure\". Recommended department: \"Roads & Infrastructure\". Complaint description is incomplete or lacks actionable civic details.",
+        "completed": true
+      },
+      {
+        "title": "Accepted & Assigned to Rajesh Sharma",
+        "timestamp": "2026-11-16T13:03:17.164Z",
+        "description": "Routed to Roads & Infrastructure queue. Assigned officer: Rajesh Sharma (officer.roads@example.com).",
+        "completed": true
+      },
+      {
+        "title": "Officer Requested More Information",
+        "timestamp": "2026-11-16T13:03:17.169Z",
+        "description": "done",
+        "completed": false
+      }
+    ],
+    "createdAt": "2026-11-16T13:03:17.164Z",
+    "updatedAt": "2026-11-16T13:03:17.164Z",
+    "remarks": "done",
+    "moreInfoRequested": {
+      "requested": true,
+      "requestedAt": "2026-11-16T13:03:17.169Z",
+      "reason": "done"
+    }
+  },
+  {
+    "_id": "comp_1794834147704",
+    "complaintNumber": "GRV528",
+    "title": "Test Potholes on Main Road",
+    "description": "Large deep potholes near the crossroad",
+    "originalLanguage": "en",
+    "citizenPreferredLanguage": "en",
+    "translatedTitle": "Test Potholes on Main Road",
+    "translatedDescription": "Large deep potholes near the crossroad",
+    "translations": {},
+    "translationStatus": "original",
+    "remarksTranslations": {},
+    "category": "Roads & Infrastructure",
+    "department": {
+      "_id": "dept_roads___infrastructure",
+      "departmentName": "Roads & Infrastructure"
+    },
+    "citizen": {
+      "_id": "660000000000000000000001",
+      "name": "Ramesh Sharma",
+      "email": "citizen@example.com"
+    },
+    "assignedOfficer": {
+      "_id": "660000000000000000000002",
+      "name": "Rajesh Sharma",
+      "email": "officer.roads@example.com"
+    },
+    "location": "Sector 14 Crossroad",
+    "priority": "High",
+    "status": "Needs More Information",
+    "isClosed": false,
+    "image": "",
+    "evidenceAnalysis": {
+      "imageIntegrity": "Missing Photo",
+      "confidence": "Medium",
+      "duplicateRisk": "Low",
+      "dHash": ""
+    },
+    "aiFlag": "Needs More Information from Citizen",
+    "authenticityScore": 50,
+    "aiValidation": {
+      "isValidCivic": false,
+      "classificationConfidence": 95,
+      "detectedCategory": "Roads & Infrastructure",
+      "recommendedDepartment": "Roads Department",
+      "imageRelevance": "Missing Photo",
+      "authenticityScore": 50,
+      "evidenceAnalysis": {
+        "imageIntegrity": "Missing Photo",
+        "confidence": "Medium",
+        "duplicateRisk": "Low",
+        "dHash": ""
+      },
+      "duplicateProbability": 0,
+      "isPossibleDuplicate": false,
+      "matchingComplaints": [],
+      "warnings": [
+        "Complaint text matches placeholder or test pattern (\"Test Potholes on Mai\").",
+        "No photographic evidence provided; on-site physical verification required."
+      ],
+      "explanation": "Complaint description is incomplete or lacks actionable civic details.",
+      "recommendedAction": "Request More Information",
+      "status": "Needs More Information",
+      "analyzedAt": "2026-11-16T13:02:27.703Z"
+    },
+    "analysisReasons": [
+      "Complaint text matches placeholder or test pattern (\"Test Potholes on Mai\").",
+      "No photographic evidence provided; on-site physical verification required."
+    ],
+    "timeline": [
+      {
+        "title": "Complaint Submitted",
+        "timestamp": "2026-11-16T13:02:27.704Z",
+        "description": "Citizen submitted grievance. Initial AI triage completed.",
+        "completed": true
+      },
+      {
+        "title": "AI Classification & Validation (95% Confidence)",
+        "timestamp": "2026-11-16T13:02:27.704Z",
+        "description": "Categorized under \"Roads & Infrastructure\". Recommended department: \"Roads & Infrastructure\". Complaint description is incomplete or lacks actionable civic details.",
+        "completed": true
+      },
+      {
+        "title": "Accepted & Assigned to Rajesh Sharma",
+        "timestamp": "2026-11-16T13:02:27.704Z",
+        "description": "Routed to Roads & Infrastructure queue. Assigned officer: Rajesh Sharma (officer.roads@example.com).",
+        "completed": true
+      },
+      {
+        "title": "Officer Requested More Information",
+        "timestamp": "2026-11-16T13:02:27.711Z",
+        "description": "done",
+        "completed": false
+      }
+    ],
+    "createdAt": "2026-11-16T13:02:27.704Z",
+    "updatedAt": "2026-11-16T13:02:27.704Z",
+    "remarks": "done",
+    "moreInfoRequested": {
+      "requested": true,
+      "requestedAt": "2026-11-16T13:02:27.711Z",
+      "reason": "done"
+    }
+  },
+  {
+    "_id": "comp_1794833375043",
+    "complaintNumber": "GRV428",
+    "title": "potholes",
+    "description": "there are many potholes on road",
+    "category": "Roads & Infrastructure",
+    "department": {
+      "_id": "660000000000000000000011",
+      "departmentName": "Roads & Infrastructure"
+    },
+    "assignedOfficer": {
+      "_id": "660000000000000000000002",
+      "name": "Rajesh Sharma",
+      "email": "officer.roads@example.com"
+    },
+    "citizen": {
+      "_id": "660000000000000000000001",
+      "name": "Ramesh Sharma",
+      "email": "citizen@example.com"
+    },
+    "location": "Main Sector 14 Road",
+    "priority": "High",
+    "status": "Needs More Information",
+    "isClosed": false,
+    "image": "",
+    "createdAt": "2026-11-16T13:01:14.095Z",
+    "timeline": [
+      {
+        "title": "Complaint Submitted",
+        "timestamp": "2026-11-16T13:01:14.098Z",
+        "description": "Citizen submitted grievance. Initial AI triage completed.",
+        "completed": true
+      },
+      {
+        "title": "AI Classification & Validation (95% Confidence)",
+        "timestamp": "2026-11-16T13:01:14.098Z",
+        "description": "Categorized under \"Roads & Infrastructure\". Recommended department: \"Roads & Infrastructure\". Evidence image flagged for inspection.",
+        "completed": true
+      },
+      {
+        "title": "Accepted & Assigned to Rajesh Sharma",
+        "timestamp": "2026-11-16T13:01:14.098Z",
+        "description": "Routed to Roads & Infrastructure queue. Assigned officer: Rajesh Sharma (officer.roads@example.com).",
+        "completed": true
+      },
+      {
+        "title": "Officer Requested More Information",
+        "timestamp": "2026-11-16T13:02:27.713Z",
+        "description": "done",
+        "completed": false
+      },
+      {
+        "title": "Officer Requested More Information",
+        "timestamp": "2026-11-16T13:03:17.171Z",
+        "description": "done",
+        "completed": false
+      },
+      {
+        "title": "Officer Requested More Information",
+        "timestamp": "2026-11-16T13:08:33.074Z",
+        "description": "done",
+        "completed": false
+      }
+    ],
+    "remarks": "done",
+    "aiFlag": "Needs More Information from Citizen",
+    "moreInfoRequested": {
+      "requested": true,
+      "requestedAt": "2026-11-16T13:08:33.074Z",
+      "reason": "done"
+    }
+  },
+  {
+    "_id": "comp_demo_water_002",
+    "complaintNumber": "GRV102",
+    "title": "Drinking Water Pipeline Leakage",
+    "description": "Fresh drinking water pipeline damaged on the main lane, water continuously flowing on the street.",
+    "category": "Water Supply Department",
+    "department": {
+      "_id": "660000000000000000000012",
+      "departmentName": "Water Supply Department"
+    },
+    "assignedOfficer": {
+      "_id": "660000000000000000000004",
+      "name": "Priya Verma",
+      "email": "officer.water@example.com"
+    },
+    "citizen": {
+      "_id": "660000000000000000000001",
+      "name": "Ramesh Sharma",
+      "email": "citizen@example.com"
+    },
+    "location": "Near Water Tank, Block B",
+    "priority": "Critical",
+    "status": "In Progress",
+    "isClosed": false,
+    "image": "",
+    "createdAt": "2026-11-16T12:01:14.098Z",
+    "timeline": [
+      {
+        "title": "Complaint Submitted",
+        "timestamp": "2026-11-16T12:01:14.098Z",
+        "description": "Citizen submitted grievance.",
+        "completed": true
+      },
+      {
+        "title": "Accepted & Assigned to Priya Verma",
+        "timestamp": "2026-11-16T12:02:54.098Z",
+        "description": "Assigned to Priya Verma.",
+        "completed": true
+      }
+    ]
+  },
+  {
+    "_id": "comp_demo_sanitation_003",
+    "complaintNumber": "GRV103",
+    "title": "Overflowing Garbage Dumpster",
+    "description": "Municipal dumpster has not been cleared for 3 days, causing foul smell and unhygienic conditions.",
+    "category": "Sanitation Department",
+    "department": {
+      "_id": "660000000000000000000013",
+      "departmentName": "Sanitation Department"
+    },
+    "assignedOfficer": {
+      "_id": "660000000000000000000005",
+      "name": "Amit Kumar",
+      "email": "officer.sanitation@example.com"
+    },
+    "citizen": {
+      "_id": "660000000000000000000001",
+      "name": "Ramesh Sharma",
+      "email": "citizen@example.com"
+    },
+    "location": "Market Square, Sector 15",
+    "priority": "Medium",
+    "status": "Accepted and Assigned",
+    "isClosed": false,
+    "image": "",
+    "createdAt": "2026-11-16T11:01:14.098Z",
+    "timeline": [
+      {
+        "title": "Complaint Submitted",
+        "timestamp": "2026-11-16T11:01:14.098Z",
+        "description": "Citizen submitted grievance.",
+        "completed": true
+      }
+    ]
+  }
+]

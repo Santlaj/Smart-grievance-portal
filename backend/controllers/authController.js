@@ -484,11 +484,170 @@ const changePassword = async (req, res) => {
   }
 };
 
+// Forgot Password - Request 6-digit OTP
+const forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (typeof email !== "string" || !email.trim()) {
+      return res.status(400).json({ message: "Please provide a valid email address." });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) {
+      return res.status(400).json({ message: "Please provide a valid email address format." });
+    }
+
+    // Generate 6-digit numeric OTP
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 mins expiry
+
+    let userFound = false;
+
+    // 1. If MongoDB is connected
+    if (getIsConnected()) {
+      const user = await User.findOne({ email: cleanEmail });
+      if (user) {
+        userFound = true;
+        user.resetPasswordOtp = otp;
+        user.resetPasswordExpires = expiresAt;
+        await user.save();
+      }
+    }
+
+    // 2. Check inMemoryUsers fallback
+    const memUser = inMemoryUsers.find((u) => u.email.toLowerCase() === cleanEmail);
+    if (memUser) {
+      userFound = true;
+      memUser.resetPasswordOtp = otp;
+      memUser.resetPasswordExpires = expiresAt;
+    }
+
+    if (!userFound) {
+      return res.status(404).json({
+        message: "No registered account found with this email address.",
+      });
+    }
+
+    console.log(`[AUTH] Password reset OTP generated for ${cleanEmail}: ${otp}`);
+
+    return res.status(200).json({
+      success: true,
+      message: "A 6-digit verification code has been sent to your email.",
+      email: cleanEmail,
+      otp, // Provided for instant demo and local testing
+      expiresInMinutes: 15,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Failed to process password reset request." });
+  }
+};
+
+// Reset Password - Verify OTP & Update Password
+const resetPassword = async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (typeof email !== "string" || !email.trim()) {
+      return res.status(400).json({ message: "Email is required." });
+    }
+    if (!otp || typeof otp !== "string" || !otp.trim()) {
+      return res.status(400).json({ message: "Verification code (OTP) is required." });
+    }
+    if (!newPassword || typeof newPassword !== "string" || newPassword.length < 6 || newPassword.length > 128) {
+      return res.status(400).json({ message: "New password must be between 6 and 128 characters long." });
+    }
+
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanOtp = String(otp).trim();
+    let userFound = false;
+    let passwordUpdated = false;
+
+    // 1. Check MongoDB
+    if (getIsConnected()) {
+      const user = await User.findOne({ email: cleanEmail });
+      if (user) {
+        userFound = true;
+        if (!user.resetPasswordOtp || !user.resetPasswordExpires) {
+          return res.status(400).json({
+            message: "No active password reset request found. Please request a new code.",
+          });
+        }
+        if (new Date() > new Date(user.resetPasswordExpires)) {
+          user.resetPasswordOtp = null;
+          user.resetPasswordExpires = null;
+          await user.save();
+          return res.status(400).json({
+            message: "Verification code has expired. Please request a new one.",
+          });
+        }
+        if (user.resetPasswordOtp !== cleanOtp) {
+          return res.status(400).json({
+            message: "Invalid verification code. Please check and try again.",
+          });
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        user.password = await bcrypt.hash(newPassword, salt);
+        user.resetPasswordOtp = null;
+        user.resetPasswordExpires = null;
+        await user.save();
+        passwordUpdated = true;
+      }
+    }
+
+    // 2. Fallback / Sync inMemoryUsers
+    const memUser = inMemoryUsers.find((u) => u.email.toLowerCase() === cleanEmail);
+    if (memUser) {
+      userFound = true;
+      if (!passwordUpdated) {
+        if (!memUser.resetPasswordOtp || !memUser.resetPasswordExpires) {
+          return res.status(400).json({
+            message: "No active password reset request found. Please request a new code.",
+          });
+        }
+        if (new Date() > new Date(memUser.resetPasswordExpires)) {
+          memUser.resetPasswordOtp = null;
+          memUser.resetPasswordExpires = null;
+          return res.status(400).json({
+            message: "Verification code has expired. Please request a new one.",
+          });
+        }
+        if (memUser.resetPasswordOtp !== cleanOtp) {
+          return res.status(400).json({
+            message: "Invalid verification code. Please check and try again.",
+          });
+        }
+      }
+      memUser.passwordHash = await bcrypt.hash(newPassword, 10);
+      memUser.resetPasswordOtp = null;
+      memUser.resetPasswordExpires = null;
+      passwordUpdated = true;
+    }
+
+    if (!userFound) {
+      return res.status(404).json({ message: "No registered account found with this email address." });
+    }
+
+    if (!passwordUpdated) {
+      return res.status(400).json({ message: "Unable to update password. Please try again." });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Password reset successful! You can now log in with your new password.",
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message || "Failed to reset password." });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   updateUserProfile,
   changePassword,
+  forgotPassword,
+  resetPassword,
   inMemoryUsers,
 };

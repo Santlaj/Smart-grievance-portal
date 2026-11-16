@@ -1,8 +1,9 @@
 const Complaint = require("../models/Complaint");
 const User = require("../models/User");
 const Department = require("../models/Department");
+const mongoose = require("mongoose");
 const { getIsConnected } = require("../config/db");
-const { inMemoryComplaints } = require("./complaintController");
+const { inMemoryComplaints, persistComplaints } = require("../lib/inMemoryStore");
 const { createNotification } = require("./notificationController");
 const { assertOwnedUpload, isStorageKey } = require("../lib/cloudinaryStorage");
 const { translateText } = require("../utils/translationService");
@@ -104,19 +105,27 @@ const getAssignedComplaints = async (req, res) => {
 
     // In-memory fallback
     const officerId = String(req.user._id);
+    const officerEmail = String(req.user.email || "").toLowerCase();
     const officerDept = req.user.department;
     const assigned = inMemoryComplaints.filter((c) => {
       if (c.isClosed || c.status === "Closed") return false;
       if (isSupervisorOrAdmin) return true;
-      const cDeptName = typeof c.department === "object" ? c.department?.departmentName : c.department;
-      if (officerDept) {
-        return (
-          cDeptName &&
-          (cDeptName.toLowerCase().includes(officerDept.toLowerCase().split(" ")[0]) ||
-            officerDept.toLowerCase().includes(cDeptName.toLowerCase().split(" ")[0]))
-        );
+
+      const assignedId = String(c.assignedOfficer?._id || c.assignedOfficer || "");
+      const assignedEmail = String(c.assignedOfficer?.email || "").toLowerCase();
+      if (assignedId && (assignedId === officerId || assignedEmail === officerEmail)) {
+        return true;
       }
-      return String(c.assignedOfficer?._id || c.assignedOfficer) === officerId;
+
+      const cDeptName = typeof c.department === "object" ? c.department?.departmentName : c.department;
+      if (officerDept && cDeptName) {
+        const d1 = String(cDeptName).toLowerCase();
+        const d2 = String(officerDept).toLowerCase();
+        if (d1.includes(d2.split(" ")[0]) || d2.includes(d1.split(" ")[0])) {
+          return true;
+        }
+      }
+      return assignedId === officerId;
     });
 
     res.status(200).json(assigned);
@@ -213,25 +222,22 @@ const updateComplaintStatus = async (req, res) => {
       return res.status(400).json({ message: "Upload resolution images through the evidence upload endpoint." });
     }
 
-    if (getIsConnected()) {
+    if (getIsConnected() && mongoose.Types.ObjectId.isValid(req.params.id)) {
       const complaint = await Complaint.findById(req.params.id)
         .populate("department", "departmentName")
         .populate("assignedOfficer", "name email");
 
-      if (!complaint) {
-        return res.status(404).json({ message: "Complaint not found" });
-      }
-
-      if (req.user.role !== "admin") {
-        const officer = await User.findById(req.user._id).select("department");
-        const assignedOfficerId = complaint.assignedOfficer?._id || complaint.assignedOfficer;
-        const complaintDepartmentId = complaint.department?._id || complaint.department;
-        const hasDepartmentAccess = officer?.department
-          && String(officer.department) === String(complaintDepartmentId);
-        if (String(assignedOfficerId || "") !== String(req.user._id) && !hasDepartmentAccess) {
-          return res.status(403).json({ message: "You may only update complaints assigned to you or your department." });
+      if (complaint) {
+        if (req.user.role !== "admin") {
+          const officer = await User.findById(req.user._id).select("department");
+          const assignedOfficerId = complaint.assignedOfficer?._id || complaint.assignedOfficer;
+          const complaintDepartmentId = complaint.department?._id || complaint.department;
+          const hasDepartmentAccess = officer?.department
+            && String(officer.department) === String(complaintDepartmentId);
+          if (String(assignedOfficerId || "") !== String(req.user._id) && !hasDepartmentAccess) {
+            return res.status(403).json({ message: "You may only update complaints assigned to you or your department." });
+          }
         }
-      }
 
       complaint.timeline = complaint.timeline || [];
 
@@ -397,12 +403,18 @@ const updateComplaintStatus = async (req, res) => {
         complaint,
       });
     }
+  }
 
     // In-memory fallback
-    const item = inMemoryComplaints.find((c) => String(c._id) === String(req.params.id));
+    const item = inMemoryComplaints.find(
+      (c) =>
+        String(c._id) === String(req.params.id) ||
+        String(c.complaintNumber || "").toLowerCase() === String(req.params.id).toLowerCase()
+    );
+
     if (item) {
       if (status) item.status = status;
-      if (remarks) {
+      if (remarks !== undefined) {
         item.remarks = remarks;
         const citizenLang = item.citizenPreferredLanguage || item.originalLanguage || "en";
         if (citizenLang && citizenLang !== "en") {
@@ -414,15 +426,66 @@ const updateComplaintStatus = async (req, res) => {
         }
       }
       if (resolutionImage) item.resolutionImage = resolutionImage;
+
+      item.timeline = item.timeline || [];
+
       if (aiAction === "confirm") {
         item.status = "Accepted and Assigned";
         item.aiFlag = "Verified & Confirmed by Officer";
+        item.timeline.push({
+          title: "Officer Confirmed & Assigned",
+          timestamp: new Date().toISOString(),
+          description: remarks || "Officer verified AI validation and accepted complaint for field resolution.",
+          completed: true,
+        });
       } else if (aiAction === "reject") {
         item.status = "Rejected";
         item.rejectionReason = rejectionReason || remarks || "Rejected by officer";
+        item.timeline.push({
+          title: "Complaint Rejected",
+          timestamp: new Date().toISOString(),
+          description: item.rejectionReason,
+          completed: true,
+        });
       } else if (status === "Resolved" || aiAction === "resolve") {
         item.status = "Resolved";
+        item.resolutionDetails = {
+          remarks: remarks || "Grievance resolved by department personnel.",
+          resolutionImage: resolutionImage || "",
+          resolvedAt: new Date().toISOString(),
+          resolvedBy: req.user._id,
+        };
+        item.timeline.push({
+          title: "Work Completed — Awaiting Citizen Confirmation",
+          timestamp: new Date().toISOString(),
+          description: remarks || "Officer marked work completed. Awaiting citizen confirmation.",
+          completed: true,
+        });
+      } else if (status === "Needs More Information" || aiAction === "request_info") {
+        item.status = "Needs More Information";
+        item.aiFlag = "Needs More Information from Citizen";
+        item.moreInfoRequested = {
+          requested: true,
+          requestedAt: new Date().toISOString(),
+          reason: infoRequestReason || remarks || "Please provide clearer photographic evidence or more exact location.",
+        };
+        item.timeline.push({
+          title: "Officer Requested More Information",
+          timestamp: new Date().toISOString(),
+          description: remarks || "Please provide clearer details.",
+          completed: false,
+        });
+      } else if (status) {
+        item.status = status;
+        item.timeline.push({
+          title: `Status Updated to "${status}"`,
+          timestamp: new Date().toISOString(),
+          description: remarks || `Officer status update: ${status}`,
+          completed: status === "Resolved",
+        });
       }
+
+      persistComplaints();
       return res.status(200).json({ message: "Complaint updated successfully", complaint: item });
     }
 

@@ -149,31 +149,49 @@ export function Login() {
           />
         </div>
 
-        <div className="relative">
-          <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type={showPassword ? "text" : "password"}
-            required
-            placeholder={t("auth_password")}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="px-11"
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground cursor-pointer"
-            aria-label="Toggle password visibility"
-          >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-          </button>
+        <div className="space-y-2">
+          <div className="relative">
+            <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type={showPassword ? "text" : "password"}
+              required
+              placeholder={t("auth_password")}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="px-11"
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-3.5 text-muted-foreground hover:text-foreground cursor-pointer"
+              aria-label="Toggle password visibility"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            </button>
+          </div>
+
+          <div className="flex items-center justify-between px-0.5 text-xs">
+            <label className="flex items-center gap-1.5 cursor-pointer select-none text-muted-foreground hover:text-slate-800">
+              <input
+                type="checkbox"
+                className="h-3.5 w-3.5 rounded border-slate-300 text-primary focus:ring-primary accent-primary"
+              />
+              <span>Remember me</span>
+            </label>
+            <Link
+              to={`/forgot-password${govMode ? "?portal=gov" : ""}`}
+              className="font-bold text-primary hover:text-primary/80 hover:underline transition-colors"
+            >
+              {t("auth_forgot_password") || "Forgot password?"}
+            </Link>
+          </div>
         </div>
 
         <Button
           type="submit"
           variant={govMode ? "navy" : "hero"}
           size="xl"
-          className="mt-2 w-full"
+          className="w-full"
           disabled={busy}
         >
           {busy ? t("btn_submitting") : t("nav_login")} <ArrowRight />
